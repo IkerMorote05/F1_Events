@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
+const slugify = require('../utils/slug');
 
-const usuarioSchema = new mongoolse.Schema(
+const usuarioSchema = new mongoose.Schema(
     {
+        slug: {
+            type: String,
+            trim: true,
+            unique: true,
+            sparse: true,
+        },
         nombre: {
             type: String,
             required:[true, 'No se pueden crear usuarios sin nombre'],
@@ -20,11 +27,12 @@ const usuarioSchema = new mongoolse.Schema(
         },
         password:{
             type: String,
+            select: false,
             required:[true, "Contraseña obligatoria"],
         },
         avatar:{
             type:mongoose.Schema.Types.ObjectId,
-            ref:"Images",
+            ref:"Image",
             required:[false]
         },
         roles:{
@@ -53,3 +61,12 @@ const usuarioSchema = new mongoolse.Schema(
             },
         }
 );
+
+usuarioSchema.pre('validate', function (next) {
+    if (!this.slug && this.nombre && this.apellidos) {
+        this.slug = slugify(`${this.nombre}-${this.apellidos}`) || 'usuario';
+    }
+    next();
+});
+
+module.exports = mongoose.model("Usuario", usuarioSchema);

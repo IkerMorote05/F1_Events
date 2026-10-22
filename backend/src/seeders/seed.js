@@ -1,9 +1,18 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-const Escuderia = require('./models/escuderia.model');
-const Piloto = require('./models/piloto.model');
-const Circuito = require('./models/circuito.model');
+const Escuderia = require('../models/escuderia.model');
+const Piloto = require('../models/piloto.model');
+const Circuito = require('../models/circuito.model');
+const Usuario = require('../models/usuarios.model');
+const Rol = require('../models/roles.model');
+const Image = require('../models/image.model');
+const Location = require('../models/location.model');
+const Variant = require('../models/variant.model');
+
+const rolesData=[
+  {nombre:"Admin", description:"Administra los archivos"}
+]
 
 const escuderiasData = [
   { nombre: 'Oracle Red Bull Racing', siglas: 'RBR', pais: 'Austria', motor: 'Red Bull Ford', jefe: 'Christian Horner',  año: 1997, categoria:"F1"},
@@ -32,7 +41,11 @@ const seedDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Conectado a la base de datos para sembrado...');
-
+    await Usuario.deleteMany({});
+    await Rol.deleteMany({});
+    await Image.deleteMany({});
+    await Location.deleteMany({});
+    await Variant.deleteMany({});
     await Escuderia.deleteMany({});
     await Piloto.deleteMany({});
     await Circuito.deleteMany({});
@@ -75,9 +88,59 @@ const seedDB = async () => {
       { nombre: "Sergio 'Checo' Perez", numero: 11, nacionalidad: 'Mexicana', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1990-07-26', categoria:"F1" },
       { nombre: 'Valtteri Bottas', numero: 77, nacionalidad: 'Finlandesa', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1989-08-28', categoria:"F1" }
     ];
-
-    await Piloto.insertMany(pilotosData);
+    const roles = await Rol.insertMany(rolesData);
+    const admin = roles.find((e) => e.nombre ==="Admin");
+    const usuariosData=[
+      {nombre:"Pepito", apellidos:"Perez", email:"prueba@gmail.com", password:"123456789", roles:admin._id}
+    ];
+    await Usuario.insertMany(usuariosData);
+    const pilotosCreados = await Piloto.insertMany(pilotosData);
     await Circuito.insertMany(circuitosData);
+
+    const locationsData = [
+      { pais: 'España', ciudad: 'Barcelona', capital: 'Madrid', slug: 'barcelona-madrid-espana' },
+      { pais: 'Italia', ciudad: 'Monza', capital: 'Roma', slug: 'monza-roma-italia' },
+      { pais: 'Japón', ciudad: 'Suzuka', capital: 'Tokio', slug: 'suzuka-tokio-japon' },
+    ];
+    await Location.insertMany(locationsData);
+
+    const variantsData = [
+      { sku: 'F1-CAP-RED-BULL', slug: 'f1-cap-red-bull' },
+      { sku: 'F1-MODEL-FERRARI', slug: 'f1-model-ferrari' },
+      { sku: 'F1-SHIRT-MCLAREN', slug: 'f1-shirt-mclaren' },
+    ];
+    await Variant.insertMany(variantsData);
+
+    const maxVerstappen = pilotosCreados.find((piloto) => piloto.nombre === 'Max Verstappen');
+    const lewisHamilton = pilotosCreados.find((piloto) => piloto.nombre === 'Lewis Hamilton');
+    const landoNorris = pilotosCreados.find((piloto) => piloto.nombre === 'Lando Norris');
+    const imagesData = [
+      {
+        entity_type: 'Piloto',
+        entity_id: maxVerstappen._id,
+        image_url: 'https://example.com/images/max-verstappen.jpg',
+        alt_text: 'Max Verstappen',
+        position: 0,
+        slug: 'max-verstappen-portrait',
+      },
+      {
+        entity_type: 'Piloto',
+        entity_id: lewisHamilton._id,
+        image_url: 'https://example.com/images/lewis-hamilton.jpg',
+        alt_text: 'Lewis Hamilton',
+        position: 0,
+        slug: 'lewis-hamilton-portrait',
+      },
+      {
+        entity_type: 'Piloto',
+        entity_id: landoNorris._id,
+        image_url: 'https://example.com/images/lando-norris.jpg',
+        alt_text: 'Lando Norris',
+        position: 0,
+        slug: 'lando-norris-portrait',
+      },
+    ];
+    await Image.insertMany(imagesData);
     console.log('Datos de prueba insertados con éxito.');
     process.exit(0);
   } catch (error) {

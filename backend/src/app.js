@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const routes = require('./routes');
 const errorHandler = require('./utils/errorHandler');
-const setupSwagger = require('./swagger');
+const setupSwagger = require('./config/swagger');
 require('dotenv').config();
 
 const app = express();

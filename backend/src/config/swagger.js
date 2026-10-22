@@ -71,6 +71,11 @@ const swaggerDocument = {
     { name: 'Circuitos', description: 'Gestión de circuitos' },
     { name: 'Carreras', description: 'Gestión de carreras' },
     { name: 'Clasificación', description: 'Clasificación del campeonato' },
+    { name: 'Imágenes', description: 'Gestión de imágenes y sus entidades asociadas' },
+    { name: 'Ubicaciones', description: 'Gestión de ubicaciones' },
+    { name: 'Variantes', description: 'Gestión de variantes' },
+    { name: 'Usuarios', description: 'Gestión de usuarios' },
+    { name: 'Roles', description: 'Gestión de roles' },
   ],
   paths: {
     '/pilotos': {
@@ -477,6 +482,284 @@ const swaggerDocument = {
         },
       },
     },
+    '/images': {
+      get: {
+        tags: ['Imágenes'],
+        summary: 'Obtener imágenes',
+        responses: {
+          200: apiResponse('Lista de imágenes', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Image' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Imágenes'],
+        summary: 'Crear una imagen',
+        requestBody: requestBody('ImageCreate', 'Datos de la imagen'),
+        responses: {
+          201: apiResponse('Imagen creada', { $ref: '#/components/schemas/Image' }),
+          400: errorResponse,
+        },
+      },
+    },
+    '/images/entity/{entityType}/{entityId}': {
+      get: {
+        tags: ['Imágenes'],
+        summary: 'Obtener imágenes de una entidad',
+        parameters: [
+          { name: 'entityType', in: 'path', required: true, schema: { type: 'string' } },
+          { ...idParameter, name: 'entityId' },
+        ],
+        responses: {
+          200: apiResponse('Imágenes de la entidad'),
+          400: errorResponse,
+        },
+      },
+    },
+    '/images/{identifier}': {
+      get: {
+        tags: ['Imágenes'],
+        summary: 'Obtener una imagen por ID o slug',
+        parameters: [{ ...slugParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Imagen encontrada', { $ref: '#/components/schemas/Image' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Imágenes'],
+        summary: 'Actualizar una imagen por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('ImageUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Imagen actualizada', { $ref: '#/components/schemas/Image' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Imágenes'],
+        summary: 'Eliminar una imagen por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Imagen eliminada', { $ref: '#/components/schemas/Image' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
+    '/locations': {
+      get: {
+        tags: ['Ubicaciones'],
+        summary: 'Obtener ubicaciones',
+        responses: {
+          200: apiResponse('Lista de ubicaciones', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Location' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Ubicaciones'],
+        summary: 'Crear una ubicación',
+        requestBody: requestBody('LocationCreate', 'Datos de la ubicación'),
+        responses: {
+          201: apiResponse('Ubicación creada', { $ref: '#/components/schemas/Location' }),
+          400: errorResponse,
+        },
+      },
+    },
+    '/locations/{identifier}': {
+      get: {
+        tags: ['Ubicaciones'],
+        summary: 'Obtener una ubicación por ID o slug',
+        parameters: [{ ...slugParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Ubicación encontrada', { $ref: '#/components/schemas/Location' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Ubicaciones'],
+        summary: 'Actualizar una ubicación por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('LocationUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Ubicación actualizada', { $ref: '#/components/schemas/Location' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Ubicaciones'],
+        summary: 'Eliminar una ubicación por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Ubicación eliminada', { $ref: '#/components/schemas/Location' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
+    '/variants': {
+      get: {
+        tags: ['Variantes'],
+        summary: 'Obtener variantes',
+        responses: {
+          200: apiResponse('Lista de variantes', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Variant' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Variantes'],
+        summary: 'Crear una variante',
+        requestBody: requestBody('VariantCreate', 'Datos de la variante'),
+        responses: {
+          201: apiResponse('Variante creada', { $ref: '#/components/schemas/Variant' }),
+          400: errorResponse,
+        },
+      },
+    },
+    '/variants/{identifier}': {
+      get: {
+        tags: ['Variantes'],
+        summary: 'Obtener una variante por ID o slug',
+        parameters: [{ ...slugParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Variante encontrada', { $ref: '#/components/schemas/Variant' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Variantes'],
+        summary: 'Actualizar una variante por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('VariantUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Variante actualizada', { $ref: '#/components/schemas/Variant' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Variantes'],
+        summary: 'Eliminar una variante por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Variante eliminada', { $ref: '#/components/schemas/Variant' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
+    '/usuarios': {
+      get: {
+        tags: ['Usuarios'],
+        summary: 'Obtener usuarios',
+        responses: {
+          200: apiResponse('Lista de usuarios', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Usuario' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Usuarios'],
+        summary: 'Crear un usuario',
+        requestBody: requestBody('UsuarioCreate', 'Datos del usuario'),
+        responses: {
+          201: apiResponse('Usuario creado', { $ref: '#/components/schemas/Usuario' }),
+          400: errorResponse,
+        },
+      },
+    },
+    '/usuarios/{identifier}': {
+      get: {
+        tags: ['Usuarios'],
+        summary: 'Obtener un usuario por ID o slug',
+        parameters: [{ ...slugParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Usuario encontrado', { $ref: '#/components/schemas/Usuario' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Usuarios'],
+        summary: 'Actualizar un usuario por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('UsuarioUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Usuario actualizado', { $ref: '#/components/schemas/Usuario' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Usuarios'],
+        summary: 'Eliminar un usuario por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Usuario eliminado', { $ref: '#/components/schemas/Usuario' }),
+          404: errorResponse,
+        },
+      },
+    },
+    '/roles': {
+      get: {
+        tags: ['Roles'],
+        summary: 'Obtener roles',
+        responses: {
+          200: apiResponse('Lista de roles', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/Rol' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Roles'],
+        summary: 'Crear un rol',
+        requestBody: requestBody('RolCreate', 'Datos del rol'),
+        responses: {
+          201: apiResponse('Rol creado', { $ref: '#/components/schemas/Rol' }),
+          400: errorResponse,
+        },
+      },
+    },
+    '/roles/{identifier}': {
+      get: {
+        tags: ['Roles'],
+        summary: 'Obtener un rol por ID o slug',
+        parameters: [{ ...slugParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Rol encontrado', { $ref: '#/components/schemas/Rol' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Roles'],
+        summary: 'Actualizar un rol por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('RolUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Rol actualizado', { $ref: '#/components/schemas/Rol' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Roles'],
+        summary: 'Eliminar un rol por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Rol eliminado', { $ref: '#/components/schemas/Rol' }),
+          400: errorResponse,
+          404: errorResponse,
+        },
+      },
+    },
     '/clasificacion': {
       get: {
         tags: ['Clasificación'],
@@ -710,6 +993,174 @@ const swaggerDocument = {
           fecha: { type: 'string', format: 'date-time' },
           capacidad: { type: 'integer', minimum: 0 },
           circuito: { type: 'string', description: 'ID de un circuito existente' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      Image: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          slug: { type: 'string' },
+          entity_type: { type: 'string', enum: ['Piloto', 'Escuderia', 'Circuito', 'Carrera', 'Usuario', 'Rol', 'Location', 'Variant'] },
+          entity_id: { type: 'string' },
+          image_url: { type: 'string', format: 'uri' },
+          alt_text: { type: 'string' },
+          position: { type: 'integer', minimum: 0 },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      ImageCreate: {
+        type: 'object',
+        required: ['entity_type', 'entity_id', 'image_url'],
+        properties: {
+          entity_type: { type: 'string', enum: ['Piloto', 'Escuderia', 'Circuito', 'Carrera', 'Usuario', 'Rol', 'Location', 'Variant'] },
+          entity_id: { type: 'string' },
+          image_url: { type: 'string', format: 'uri' },
+          alt_text: { type: 'string' },
+          position: { type: 'integer', minimum: 0 },
+          isActive: { type: 'boolean' },
+        },
+      },
+      ImageUpdate: {
+        type: 'object',
+        properties: {
+          entity_type: { type: 'string', enum: ['Piloto', 'Escuderia', 'Circuito', 'Carrera', 'Usuario', 'Rol', 'Location', 'Variant'] },
+          entity_id: { type: 'string' },
+          image_url: { type: 'string', format: 'uri' },
+          alt_text: { type: 'string' },
+          position: { type: 'integer', minimum: 0 },
+          isActive: { type: 'boolean' },
+        },
+      },
+      Location: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          slug: { type: 'string' },
+          pais: { type: 'string' },
+          ciudad: { type: 'string' },
+          capital: { type: 'string' },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      LocationCreate: {
+        type: 'object',
+        required: ['pais', 'ciudad', 'capital'],
+        properties: {
+          pais: { type: 'string' },
+          ciudad: { type: 'string' },
+          capital: { type: 'string' },
+          isActive: { type: 'boolean' },
+        },
+      },
+      LocationUpdate: {
+        type: 'object',
+        properties: {
+          pais: { type: 'string' },
+          ciudad: { type: 'string' },
+          capital: { type: 'string' },
+          isActive: { type: 'boolean' },
+        },
+      },
+      Variant: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          slug: { type: 'string' },
+          sku: { type: 'string' },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      VariantCreate: {
+        type: 'object',
+        required: ['sku'],
+        properties: { sku: { type: 'string' }, isActive: { type: 'boolean' } },
+      },
+      VariantUpdate: {
+        type: 'object',
+        properties: { sku: { type: 'string' }, isActive: { type: 'boolean' } },
+      },
+      Usuario: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          slug: { type: 'string' },
+          nombre: { type: 'string' },
+          apellidos: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          avatar: { type: 'string' },
+          roles: { type: 'string' },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      UsuarioCreate: {
+        type: 'object',
+        required: ['nombre', 'apellidos', 'email', 'password', 'roles'],
+        properties: {
+          nombre: { type: 'string' },
+          apellidos: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+          avatar: { type: 'string' },
+          roles: { type: 'string' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      UsuarioUpdate: {
+        type: 'object',
+        properties: {
+          nombre: { type: 'string' },
+          apellidos: { type: 'string' },
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+          avatar: { type: 'string' },
+          roles: { type: 'string' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      Rol: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          slug: { type: 'string' },
+          nombre: { type: 'string' },
+          description: { type: 'string' },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      RolCreate: {
+        type: 'object',
+        required: ['nombre', 'description'],
+        properties: {
+          nombre: { type: 'string' },
+          description: { type: 'string' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      RolUpdate: {
+        type: 'object',
+        properties: {
+          nombre: { type: 'string' },
+          description: { type: 'string' },
           isActive: { type: 'boolean' },
           status: { type: 'string' },
         },
