@@ -1,0 +1,1 @@
+import{j as r}from"./index-Dv8S8GfG.js";const s=({message:e,onRetry:t,resourceName:o="pilotos"})=>r.jsxs("div",{className:"piloto-error",role:"alert",children:[r.jsx("p",{children:e}),t&&r.jsx("button",{type:"button",className:"btn-secondary",onClick:t,"aria-label":`Reintentar carga de ${o}`,children:"Reintentar"})]});export{s as P};

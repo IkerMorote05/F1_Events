@@ -1,0 +1,26 @@
+{
+  "name": "f1-api-clean",
+  "version": "1.0.0",
+  "description": "API REST para clasificación de pilotos de F1 (Clean Architecture)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "seed": "node src/seed.js",
+    "migrate": "node src/migrate-existing-data.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^8.3.0",
+    "mongoose": "^8.3.1",
+    "morgan": "^1.12.1",
+    "slugify": "^1.6.9",
+    "swagger-ui-express": "^5.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
