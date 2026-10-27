@@ -35,9 +35,9 @@ const escuderiaSchema = new mongoose.Schema(
       trim: true,
     },
     categoria:{
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaGlobal',
       required: [true, "La categoria es necesaria"],
-      trim: true
     },
     slug: {
       type: String,

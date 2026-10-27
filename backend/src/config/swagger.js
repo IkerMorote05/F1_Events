@@ -883,7 +883,8 @@ const swaggerDocument = {
         properties: {
           _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
           nombre: { type: 'string', example: 'Circuit de Barcelona-Catalunya' },
-          tipo: { type: 'string', example: 'Permanente' },
+          categoria: { $ref: '#/components/schemas/CategoriaGlobalRef' },
+          tipo: { $ref: '#/components/schemas/CategoriaCircuitosTipoRef' },
           slug: { type: 'string', example: 'circuit-de-barcelona-catalunya' },
           longitud: { type: 'number', example: 4.657 },
           ultimoGanador: { type: 'string', example: 'Oscar Piastri' },
@@ -896,7 +897,7 @@ const swaggerDocument = {
               anio: { type: 'string', format: 'date-time' },
             },
           },
-          desgaste: { type: 'string', example: 'Medio' },
+          desgaste: { $ref: '#/components/schemas/CategoriaCircuitosDesgasteRef' },
           isActive: { type: 'boolean' },
           deletedAt: { type: 'string', format: 'date-time', nullable: true },
           status: { type: 'string', example: 'active' },
@@ -904,12 +905,34 @@ const swaggerDocument = {
           lastUpdate: { type: 'string', format: 'date-time' },
         },
       },
+      CategoriaCircuitosTipoRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          tipo: { type: 'string' },
+        },
+      },
+      CategoriaCircuitosDesgasteRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          desgaste: { type: 'string' },
+        },
+      },
+      CategoriaGlobalRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          competicion: { type: 'string' },
+        },
+      },
       CircuitoCreate: {
         type: 'object',
-        required: ['nombre', 'tipo', 'longitud', 'pais'],
+        required: ['nombre', 'categoria', 'tipo', 'longitud', 'location'],
         properties: {
           nombre: { type: 'string' },
-          tipo: { type: 'string' },
+          categoria: { type: 'string', description: 'ID o competición de CategoriaGlobal' },
+          tipo: { type: 'string', description: 'ID de categoría o valor textual de tipo' },
           longitud: { type: 'number', minimum: 0 },
           ultimoGanador: { type: 'string' },
           pais: { type: 'string' },
@@ -922,7 +945,7 @@ const swaggerDocument = {
               anio: { type: 'string', format: 'date-time' },
             },
           },
-          desgaste: { type: 'string' },
+          desgaste: { type: 'string', description: 'ID de categoría o valor textual de desgaste' },
           isActive: { type: 'boolean' },
           status: { type: 'string' },
         },
@@ -931,7 +954,8 @@ const swaggerDocument = {
         type: 'object',
         properties: {
           nombre: { type: 'string' },
-          tipo: { type: 'string' },
+          categoria: { type: 'string', description: 'ID o competición de CategoriaGlobal' },
+          tipo: { type: 'string', description: 'ID de categoría o valor textual de tipo' },
           longitud: { type: 'number', minimum: 0 },
           ultimoGanador: { type: 'string' },
           pais: { type: 'string' },
@@ -944,7 +968,7 @@ const swaggerDocument = {
               anio: { type: 'string', format: 'date-time' },
             },
           },
-          desgaste: { type: 'string' },
+          desgaste: { type: 'string', description: 'ID de categoría o valor textual de desgaste' },
           isActive: { type: 'boolean' },
           status: { type: 'string' },
         },

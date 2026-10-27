@@ -24,6 +24,7 @@ const pilotoCreate = z
     numero: numericValue,
     nacionalidad: z.string().min(1),
     escuderia: z.string().min(1),
+    categoria: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de categoría válido'),
     puntos: numericValue.optional(),
     victorias: numericValue.optional(),
     podios: numericValue.optional(),
@@ -40,6 +41,7 @@ const escuderiaCreate = z
     nombre: z.string().min(1),
     pais: z.string().min(1),
     motor: z.string().min(1),
+    categoria: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de categoría válido'),
     siglas: z.string().optional(),
     jefe: z.string().optional(),
     año: numericValue.optional(),
@@ -60,10 +62,11 @@ const vueltaRapidaSchema = z
 const circuitoCreate = z
   .object({
     nombre: z.string().min(1),
+    categoria: z.string().min(1),
     tipo: z.string().min(1),
     longitud: nonNegativeNumericValue,
     ultimoGanador: z.string().optional(),
-    pais: z.string().min(1),
+    location: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de ubicación válido'),
     vueltaRapida: vueltaRapidaSchema.optional(),
     desgaste: z.string().optional(),
     isActive: z.boolean().optional(),
@@ -72,6 +75,42 @@ const circuitoCreate = z
   .passthrough();
 
 const circuitoUpdate = circuitoCreate.partial();
+
+const categoriaGlobalCreate = z
+  .object({
+    competicion: z.string().trim().min(1),
+    isActive: z.boolean().optional(),
+    status: z.string().optional(),
+  })
+  .passthrough();
+
+const categoriaGlobalUpdate = categoriaGlobalCreate.partial();
+
+const categoriaCircuitosCreate = z
+  .object({
+    desgaste: z.string().trim().min(1).optional(),
+    tipo: z.string().trim().min(1).optional(),
+    isActive: z.boolean().optional(),
+    status: z.string().optional(),
+  })
+  .passthrough()
+  .refine((data) => Boolean(data.tipo) !== Boolean(data.desgaste), {
+    message: 'Debe indicar solo un tipo o un desgaste',
+    path: ['tipo'],
+  });
+
+const categoriaCircuitosUpdate = z
+  .object({
+    desgaste: z.string().trim().min(1).optional(),
+    tipo: z.string().trim().min(1).optional(),
+    isActive: z.boolean().optional(),
+    status: z.string().optional(),
+  })
+  .passthrough()
+  .refine((data) => !(data.tipo && data.desgaste), {
+    message: 'Debe indicar tipo o desgaste, no ambos',
+    path: ['tipo'],
+  });
 
 const carreraCreate = z
   .object({
@@ -183,6 +222,10 @@ module.exports = {
   escuderiaUpdate,
   circuitoCreate,
   circuitoUpdate,
+  categoriaGlobalCreate,
+  categoriaGlobalUpdate,
+  categoriaCircuitosCreate,
+  categoriaCircuitosUpdate,
   carreraCreate,
   carreraUpdate,
   locationCreate,

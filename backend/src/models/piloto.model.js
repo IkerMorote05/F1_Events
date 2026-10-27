@@ -42,9 +42,9 @@ const pilotoSchema = new mongoose.Schema(
       type: Date,
     },
     categoria:{
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaGlobal',
       required: [true, "La categoria es necesaria"],
-      trim: true
     },
     slug: {
       type: String,

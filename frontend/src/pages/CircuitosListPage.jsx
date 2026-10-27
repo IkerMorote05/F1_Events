@@ -50,8 +50,9 @@ export const CircuitosListPage = () => {
 
   const columns = [
     { key: 'nombre', label: 'Circuito' },
-    { key: 'pais', label: 'País' },
-    { key: 'tipo', label: 'Tipo' },
+    { key: 'categoria', label: 'Competición', render: (circuito) => circuito.categoria?.competicion || 'N/A' },
+    { key: 'location', label: 'País', render: (circuito) => circuito.location?.pais || 'N/A' },
+    { key: 'tipo', label: 'Tipo', render: (circuito) => circuito.tipo?.tipo || circuito.tipo || 'N/A' },
     { key: 'longitud', label: 'Longitud', render: (circuito) => `${circuito.longitud} km` },
     { key: 'ultimoGanador', label: 'Último ganador', render: (circuito) => circuito.ultimoGanador || 'N/A' },
     {
@@ -107,7 +108,7 @@ export const CircuitosListPage = () => {
     }
   ];
 
-  const paises = new Set(circuitos.map((circuito) => circuito.pais).filter(Boolean)).size;
+  const paises = new Set(circuitos.map((circuito) => circuito.location?.pais).filter(Boolean)).size;
   const activos = circuitos.filter((circuito) => !circuito.deletedAt && circuito.isActive !== false).length;
 
   return (

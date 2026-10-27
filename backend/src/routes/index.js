@@ -9,6 +9,8 @@ const locationRoutes = require('./location.routes');
 const variantRoutes = require('./variant.routes');
 const usuarioRoutes = require('./usuario.routes');
 const rolRoutes = require('./rol.routes');
+const categoriaGlobalRoutes = require('./categoria-global.routes');
+const categoriaCircuitosRoutes = require('./categoria-circuitos.routes');
 const AppError = require('../utils/appError');
 const router = Router();
 
@@ -22,6 +24,8 @@ router.use('/locations', locationRoutes);
 router.use('/variants', variantRoutes);
 router.use('/usuarios', usuarioRoutes);
 router.use('/roles', rolRoutes);
+router.use('/categorias-globales', categoriaGlobalRoutes);
+router.use('/categorias-circuitos', categoriaCircuitosRoutes);
 
 router.use((req, res, next) => {
   next(new AppError(`Ruta no encontrada: ${req.originalUrl}`, 404));

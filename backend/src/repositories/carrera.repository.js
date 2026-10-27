@@ -1,13 +1,21 @@
 const Carrera = require('../models/carrera.model');
 
 class CarreraRepository {
+  populateCircuito(query) {
+    return query.populate({
+      path: 'circuito',
+      select: 'nombre slug location',
+      populate: { path: 'location', select: 'pais ciudad capital slug' },
+    });
+  }
+
   async findAll(includeDeleted = false) {
     const query = includeDeleted ? {} : { deletedAt: null };
-    return Carrera.find(query).populate('circuito', 'nombre slug pais');
+    return this.populateCircuito(Carrera.find(query));
   }
 
   async findById(id) {
-    return Carrera.findOne({ _id: id, deletedAt: null }).populate('circuito', 'nombre slug pais');
+    return this.populateCircuito(Carrera.findOne({ _id: id, deletedAt: null }));
   }
 
   async findBySlug(slug, includeDeleted = false) {
@@ -15,7 +23,7 @@ class CarreraRepository {
     if (!includeDeleted) {
       query.deletedAt = null;
     }
-    return Carrera.findOne(query).populate('circuito', 'nombre slug pais');
+    return this.populateCircuito(Carrera.findOne(query));
   }
 
   async findByCircuito(id, includeDeleted = false) {
@@ -31,10 +39,10 @@ class CarreraRepository {
   }
 
   async update(id, data) {
-    return Carrera.findOneAndUpdate({ _id: id, deletedAt: null }, data, {
+    return this.populateCircuito(Carrera.findOneAndUpdate({ _id: id, deletedAt: null }, data, {
       new: true,
       runValidators: true,
-    }).populate('circuito', 'nombre slug pais');
+    }));
   }
 
   async softDelete(id) {

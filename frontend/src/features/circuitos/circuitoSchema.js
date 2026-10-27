@@ -10,13 +10,14 @@ const optionalYear = z
 
 export const circuitoSchema = z.object({
   nombre: z.string().trim().min(1, 'El nombre es obligatorio'),
+  categoria: z.string().trim().min(1, 'La competición es obligatoria'),
   tipo: z.string().trim().min(1, 'El tipo de circuito es obligatorio'),
   longitud: z.string()
     .trim()
     .regex(/^\d+(\.\d+)?$/, 'La longitud debe ser un número válido')
     .transform(Number)
     .pipe(z.number().finite().min(0, 'La longitud no puede ser negativa')),
-  pais: z.string().trim().min(1, 'El país es obligatorio'),
+  location: z.string().trim().min(1, 'La ubicación es obligatoria'),
   ultimoGanador: z.string().trim().optional(),
   desgaste: z.string().trim().optional(),
   tiempoVueltaRapida: z.string().trim().optional(),

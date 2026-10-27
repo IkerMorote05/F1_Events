@@ -25,10 +25,15 @@ const circuitoSchema = new mongoose.Schema(
       required: [true, 'El nombre del circuito es obligatorio'],
       trim: true,
     },
+    categoria: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaGlobal',
+      required: [true, 'La categoría del circuito es obligatoria'],
+    },
     tipo: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaCircuitos',
       required: [true, 'El tipo de circuito es obligatorio'],
-      trim: true,
     },
     slug: {
       type: String,
@@ -45,17 +50,17 @@ const circuitoSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    pais: {
-      type: String,
-      required: [true, 'El país es obligatorio'],
-      trim: true,
+    location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Location',
+      required: [true, 'La ubicación es obligatoria'],
     },
     vueltaRapida: {
       type: vueltaRapidaSchema,
     },
     desgaste: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaCircuitos',
     },
     isActive: {
       type: Boolean,

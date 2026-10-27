@@ -8,7 +8,21 @@ const Image = require('./models/image.model');
 const Variant = require('./models/variant.model');
 const Usuario = require('./models/usuarios.model');
 const Rol = require('./models/roles.model');
+const CategoriaGlobal = require('./models/categoria-global.model');
+const Circuito = require('./models/circuito.model');
+const CategoriaCircuitos = require('./models/categoria-circuitos.model');
 const slugify = require('./utils/slug');
+
+const legacyCircuitLocations = new Map([
+  ['espana', { pais: 'España', ciudad: 'Barcelona', capital: 'Madrid' }],
+  ['bahrein', { pais: 'Bahrein', ciudad: 'Sakhir', capital: 'Manama' }],
+  ['australia', { pais: 'Australia', ciudad: 'Melbourne', capital: 'Canberra' }],
+  ['china', { pais: 'China', ciudad: 'Shanghai', capital: 'Beijing' }],
+  ['japon', { pais: 'Japón', ciudad: 'Suzuka', capital: 'Tokio' }],
+]);
+
+const normalizeCountry = (country) =>
+  country.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
 const createSlug = (name, usedSlugs, fallback) => {
   const baseSlug = slugify(name) || fallback;
@@ -76,12 +90,164 @@ const migrateCollection = async (Model, fallback, getSlugSource, includeStatus =
   return documents.length;
 };
 
+const migrateCircuitLocations = async () => {
+  const locations = await Location.find({});
+  const locationsByCountry = new Map(
+    locations.map((location) => [normalizeCountry(location.pais), location])
+  );
+  const legacyCircuits = await Circuito.collection
+    .find({ location: { $exists: false }, pais: { $type: 'string' } })
+    .toArray();
+
+  for (const circuit of legacyCircuits) {
+    const country = normalizeCountry(circuit.pais);
+    let location = locationsByCountry.get(country);
+    if (!location) {
+      const locationData = legacyCircuitLocations.get(country);
+      if (!locationData) {
+        throw new Error(
+          `No se puede migrar el circuito "${circuit.nombre}": falta una ubicación para "${circuit.pais}"`
+        );
+      }
+      location = await Location.create(locationData);
+      locationsByCountry.set(country, location);
+    }
+
+    await Circuito.collection.updateOne(
+      { _id: circuit._id, location: { $exists: false } },
+      { $set: { location: location._id }, $unset: { pais: '' } }
+    );
+  }
+
+  return legacyCircuits.length;
+};
+
+const migrateCategoryReferences = async () => {
+  const [escuderias, pilotos] = await Promise.all([
+    Escuderia.collection.find({ categoria: { $type: 'string' } }).toArray(),
+    Piloto.collection.find({ categoria: { $type: 'string' } }).toArray(),
+  ]);
+  const categorias = new Map();
+
+  for (const document of [...escuderias, ...pilotos]) {
+    const competicion = document.categoria.trim();
+    if (!competicion) {
+      throw new Error(`No se puede migrar la categoría vacía del documento ${document._id}`);
+    }
+    if (!categorias.has(competicion)) {
+      let categoria = await CategoriaGlobal.findOne({ competicion });
+      if (!categoria) {
+        categoria = await CategoriaGlobal.create({ competicion });
+      }
+      categorias.set(competicion, categoria._id);
+    }
+  }
+
+  for (const [Model, documents] of [[Escuderia, escuderias], [Piloto, pilotos]]) {
+    for (const document of documents) {
+      await Model.collection.updateOne(
+        { _id: document._id, categoria: document.categoria },
+        { $set: { categoria: categorias.get(document.categoria.trim()) } }
+      );
+    }
+  }
+
+  return escuderias.length + pilotos.length;
+};
+
+const migrateCircuitGlobalCategories = async () => {
+  const circuitos = await Circuito.collection.find({
+    $or: [
+      { categoria: { $type: 'string' } },
+      { categproa: { $type: 'string' } },
+    ],
+  }).toArray();
+
+  for (const circuito of circuitos) {
+    const competicion = (circuito.categoria || circuito.categproa).trim();
+    if (!competicion) {
+      throw new Error(`No se puede migrar la categoría vacía del circuito ${circuito._id}`);
+    }
+
+    let categoria = await CategoriaGlobal.findOne({ competicion });
+    if (!categoria) {
+      categoria = await CategoriaGlobal.create({ competicion });
+    }
+
+    await Circuito.collection.updateOne(
+      { _id: circuito._id },
+      { $set: { categoria: categoria._id }, $unset: { categproa: '' } }
+    );
+  }
+
+  return circuitos.length;
+};
+
+const migrateCircuitCategoryReferences = async () => {
+  const circuitos = await Circuito.collection.find({
+    $or: [
+      { tipo: { $type: 'string' } },
+      { desgaste: { $type: 'string' } },
+    ],
+  }).toArray();
+  const categoriesByValue = new Map();
+
+  for (const circuit of circuitos) {
+    const fields = {};
+    const unsetFields = {};
+    for (const field of ['tipo', 'desgaste']) {
+      const value = circuit[field];
+      if (typeof value !== 'string') {
+        continue;
+      }
+
+      const normalizedValue = value.trim();
+      if (!normalizedValue) {
+        if (field === 'tipo') {
+          throw new Error(`No se puede migrar el tipo vacío del circuito ${circuit._id}`);
+        }
+        unsetFields[field] = '';
+        continue;
+      }
+
+      const key = `${field}:${normalizedValue}`;
+      if (!categoriesByValue.has(key)) {
+        let category = await CategoriaCircuitos.findOne({ [field]: normalizedValue });
+        if (!category) {
+          category = await CategoriaCircuitos.create({
+            [field]: normalizedValue,
+            slug: `${field}-${slugify(normalizedValue) || 'categoria'}`,
+          });
+        }
+        categoriesByValue.set(key, category._id);
+      }
+      fields[field] = categoriesByValue.get(key);
+    }
+
+    const update = {};
+    if (Object.keys(fields).length > 0) {
+      update.$set = fields;
+    }
+    if (Object.keys(unsetFields).length > 0) {
+      update.$unset = unsetFields;
+    }
+    if (Object.keys(update).length > 0) {
+      await Circuito.collection.updateOne({ _id: circuit._id }, update);
+    }
+  }
+
+  return circuitos.length;
+};
+
 const migrateExistingData = async () => {
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI no está configurada');
   }
 
   await mongoose.connect(process.env.MONGO_URI);
+  const categorias = await migrateCategoryReferences();
+  const categoriasCircuitosGlobales = await migrateCircuitGlobalCategories();
+  const categoriasCircuitos = await migrateCircuitCategoryReferences();
   const escuderias = await migrateCollection(
     Escuderia,
     'escuderia',
@@ -118,9 +284,10 @@ const migrateExistingData = async () => {
     true
   );
   const roles = await migrateCollection(Rol, 'rol', (document) => document.nombre, true);
+  const circuitos = await migrateCircuitLocations();
 
   console.log(
-    `Migración completada: ${escuderias} escuderías, ${pilotos} pilotos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, ${usuarios} usuarios y ${roles} roles revisados.`
+    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, ${usuarios} usuarios y ${roles} roles revisados.`
   );
 };
 

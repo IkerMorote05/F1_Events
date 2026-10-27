@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { circuitoSchema } from './circuitoSchema';
+import { getLocations } from '../../services/locationService';
 
 const emptyForm = {
   nombre: '',
+  categoria: 'F1',
   tipo: '',
   longitud: '',
-  pais: '',
+  location: '',
   ultimoGanador: '',
   desgaste: '',
   tiempoVueltaRapida: '',
@@ -16,17 +18,40 @@ const emptyForm = {
 export const CircuitoForm = ({ initialData, submitting, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState(emptyForm);
   const [errors, setErrors] = useState({});
+  const [locations, setLocations] = useState([]);
+  const [locationsLoading, setLocationsLoading] = useState(true);
+  const [locationsError, setLocationsError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLocations = async () => {
+      try {
+        const availableLocations = await getLocations();
+        if (active) setLocations(availableLocations);
+      } catch (error) {
+        console.error('Error al cargar las ubicaciones:', error);
+        if (active) setLocationsError('No se pudieron cargar las ubicaciones.');
+      } finally {
+        if (active) setLocationsLoading(false);
+      }
+    };
+
+    loadLocations();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const vueltaRapida = initialData?.vueltaRapida;
     setFormData(initialData
       ? {
           nombre: initialData.nombre || '',
-          tipo: initialData.tipo || '',
+          categoria: initialData.categoria?.competicion || initialData.categoria || 'F1',
+          tipo: initialData.tipo?.tipo || initialData.tipo || '',
           longitud: String(initialData.longitud ?? ''),
-          pais: initialData.pais || '',
+          location: initialData.location?._id || initialData.location || '',
           ultimoGanador: initialData.ultimoGanador || '',
-          desgaste: initialData.desgaste || '',
+          desgaste: initialData.desgaste?.desgaste || initialData.desgaste || '',
           tiempoVueltaRapida: vueltaRapida?.tiempo || '',
           pilotoVueltaRapida: vueltaRapida?.piloto || '',
           anioVueltaRapida: vueltaRapida?.anio
@@ -73,6 +98,11 @@ export const CircuitoForm = ({ initialData, submitting, onSubmit, onCancel }) =>
       <input id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} {...fieldProps('nombre')} />
       {fieldError('nombre')}
 
+      <label htmlFor="categoria">Competición</label>
+      <input id="categoria" name="categoria" value={formData.categoria} onChange={handleChange}
+        {...fieldProps('categoria')} />
+      {fieldError('categoria')}
+
       <label htmlFor="tipo">Tipo de circuito</label>
       <input id="tipo" name="tipo" value={formData.tipo} onChange={handleChange} {...fieldProps('tipo')} />
       {fieldError('tipo')}
@@ -82,9 +112,18 @@ export const CircuitoForm = ({ initialData, submitting, onSubmit, onCancel }) =>
         onChange={handleChange} {...fieldProps('longitud')} />
       {fieldError('longitud')}
 
-      <label htmlFor="pais">País</label>
-      <input id="pais" name="pais" value={formData.pais} onChange={handleChange} {...fieldProps('pais')} />
-      {fieldError('pais')}
+      <label htmlFor="location">Ubicación</label>
+      <select id="location" name="location" value={formData.location} onChange={handleChange}
+        disabled={locationsLoading || Boolean(locationsError)} {...fieldProps('location')}>
+        <option value="">{locationsLoading ? 'Cargando ubicaciones...' : 'Selecciona una ubicación'}</option>
+        {locations.map((location) => (
+          <option key={location._id} value={location._id}>
+            {location.ciudad}, {location.pais}
+          </option>
+        ))}
+      </select>
+      {locationsError ? <p className="piloto-field-error">{locationsError}</p> : null}
+      {fieldError('location')}
 
       <label htmlFor="ultimoGanador">Último ganador</label>
       <input id="ultimoGanador" name="ultimoGanador" value={formData.ultimoGanador} onChange={handleChange} />

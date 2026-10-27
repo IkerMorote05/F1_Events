@@ -1,5 +1,6 @@
 const escuderiaRepository = require('../repositories/escuderia.repository');
 const pilotoRepository = require('../repositories/piloto.repository');
+const CategoriaGlobal = require('../models/categoria-global.model');
 const AppError = require('../utils/appError');
 const mongoose = require('mongoose');
 const { createUniqueSlug } = require('../utils/slug');
@@ -29,6 +30,10 @@ class EscuderiaService {
   }
 
   async crearEscuderia(data) {
+    if (!(await CategoriaGlobal.findById(data.categoria))) {
+      throw new AppError('La categoría proporcionada no existe', 400);
+    }
+
     const nombreExiste = await escuderiaRepository.findByNombre(data.nombre);
     if (nombreExiste) {
       throw new AppError('Ya existe una escudería con ese nombre', 400);
@@ -47,6 +52,10 @@ class EscuderiaService {
   }
 
   async actualizarEscuderia(id, data) {
+    if (data.categoria && !(await CategoriaGlobal.findById(data.categoria))) {
+      throw new AppError('La categoría proporcionada no existe', 400);
+    }
+
     if (data.nombre) {
       const nombreExiste = await escuderiaRepository.findByNombre(data.nombre);
       if (nombreExiste && nombreExiste._id.toString() !== id) {
