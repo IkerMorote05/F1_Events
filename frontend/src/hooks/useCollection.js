@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export const useCollection = ({ fetchAll, create, update, remove, resourceName, listKey, errorMessage }) => {
+export const useCollection = ({
+  fetchAll,
+  create,
+  update,
+  remove,
+  resourceName,
+  listKey,
+  errorMessage
+}) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mutating, setMutating] = useState(false);
 
   const reload = useCallback(async () => {
     try {
@@ -27,23 +36,49 @@ export const useCollection = ({ fetchAll, create, update, remove, resourceName, 
     reload();
   }, [reload]);
 
-  const createItem = async (data) => {
-    const result = await create(data);
-    await reload();
-    return result;
-  };
+  const createItem = useCallback(async (data) => {
+    if (!create) throw new Error(`No se puede crear ${resourceName}.`);
 
-  const updateItem = async (id, data) => {
-    const result = await update(id, data);
-    await reload();
-    return result;
-  };
+    setMutating(true);
+    try {
+      const result = await create(data);
+      await reload();
+      return result;
+    } finally {
+      setMutating(false);
+    }
+  }, [create, reload, resourceName]);
 
-  const removeItem = async (id) => {
-    const result = await remove(id);
-    await reload();
-    return result;
-  };
+  const updateItem = useCallback(async (id, data) => {
+    if (!update) throw new Error(`No se puede actualizar ${resourceName}.`);
 
-  return { items, loading, error, reload, createItem, updateItem, removeItem };
+    setMutating(true);
+    try {
+      const result = await update(id, data);
+      await reload();
+      return result;
+    } finally {
+      setMutating(false);
+    }
+  }, [reload, resourceName, update]);
+
+  const removeItem = useCallback(async (id) => {
+    if (!remove) throw new Error(`No se puede eliminar ${resourceName}.`);
+
+    setMutating(true);
+    try {
+      const result = await remove(id);
+      await reload();
+      return result;
+    } finally {
+      setMutating(false);
+    }
+  }, [reload, remove, resourceName]);
+
+  const collection = { items, loading, error, reload, mutating };
+  if (create) collection.createItem = createItem;
+  if (update) collection.updateItem = updateItem;
+  if (remove) collection.removeItem = removeItem;
+
+  return collection;
 };

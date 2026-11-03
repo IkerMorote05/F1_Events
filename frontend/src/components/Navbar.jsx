@@ -1,6 +1,17 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Flag, Route, Users, Trophy, CalendarDays } from 'lucide-react';
+import {
+  Flag,
+  Layers,
+  Route,
+  Users,
+  Trophy,
+  CalendarDays,
+  Tags,
+  Shield,
+  MapPin,
+  Package
+} from 'lucide-react';
 
 export const Navbar = () => {
   return (
@@ -27,9 +38,33 @@ export const Navbar = () => {
             <Route size={17} aria-hidden="true" />
             <span>Circuitos</span>
           </NavLink>
+          <NavLink to="/categorias-circuitos" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Layers size={17} aria-hidden="true" />
+            <span>Categorías de circuitos</span>
+          </NavLink>
+          <NavLink to="/categorias-globales" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Tags size={17} aria-hidden="true" />
+            <span>Categorías globales</span>
+          </NavLink>
           <NavLink to="/carreras" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
             <CalendarDays size={17} aria-hidden="true" />
             <span>Carreras</span>
+          </NavLink>
+          <NavLink to="/usuarios" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Users size={17} aria-hidden="true" />
+            <span>Usuarios</span>
+          </NavLink>
+          <NavLink to="/roles" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Shield size={17} aria-hidden="true" />
+            <span>Roles</span>
+          </NavLink>
+          <NavLink to="/locations" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <MapPin size={17} aria-hidden="true" />
+            <span>Ubicaciones</span>
+          </NavLink>
+          <NavLink to="/variants" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Package size={17} aria-hidden="true" />
+            <span>Variantes</span>
           </NavLink>
         </div>
       </nav>

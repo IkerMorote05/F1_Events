@@ -14,6 +14,9 @@ export const pilotoSchema = z.object({
   numero: requiredInteger('El número', 0),
   nacionalidad: z.string().trim().min(1, 'La nacionalidad es obligatoria'),
   puntos: requiredInteger('Los puntos', 0),
+  victorias: requiredInteger('Las victorias', 0),
+  podios: requiredInteger('Los podios', 0),
   escuderia: z.string().min(1, 'Selecciona una escudería'),
+  categoria: z.string().min(1, 'Selecciona una categoría'),
   fecha_nacimiento: z.string().optional()
 });

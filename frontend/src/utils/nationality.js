@@ -15,6 +15,7 @@ const NATIONALITIES = {
   neozelandés: { flag: 'nz', code: 'NZL' },
   tailandesa: { flag: 'th', code: 'THA' },
   tahilandesa: { flag: 'th', code: 'THA' },
+  japonesa:{flag:'jp', code:'JPN'}
 };
 
 export const getNationalityDisplay = (nationality = '') =>

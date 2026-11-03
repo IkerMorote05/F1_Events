@@ -77,27 +77,29 @@ const seedDB = async () => {
 
     const pilotosData = [
       { nombre: 'Nico Hulkenberg', numero: 27, nacionalidad: 'Alemana', escuderia: audi, puntos: 13, victorias: 0, podios: 0, fecha_nacimiento: '1987-08-19', categoria:"F1" },
-      { nombre: 'Gabriel Bortoleto', numero: 5, nacionalidad: 'Brasileña', escuderia: audi, puntos: 10, victorias: 0, podios: 0, fecha_nacimiento: '2002-05-15', categoria:"F1" },
+      { nombre: 'Gabriel Bortoleto', numero: 5, nacionalidad: 'Brasileña', escuderia: audi, puntos: 15, victorias: 0, podios: 0, fecha_nacimiento: '2002-05-15', categoria:"F1" },
       { nombre: 'Esteban Ocon', numero: 31, nacionalidad: 'Francesa', escuderia: haas, puntos: 7, victorias: 0, podios: 0, fecha_nacimiento: '1996-09-18' , categoria:"F1"},
       { nombre: 'Oliver Bearman', numero: 87, nacionalidad: 'Británica', escuderia: haas, puntos: 23, victorias: 0, podios: 0, fecha_nacimiento: '2004-04-28', categoria:"F1" },
       { nombre: 'Pierre Gasly', numero: 10, nacionalidad: 'Francesa', escuderia: alpine, puntos: 42, victorias: 0, podios: 0, fecha_nacimiento: '1996-02-24', categoria:"F1" },
       { nombre: 'Franco Colapinto', numero: 43, nacionalidad: 'Argentina', escuderia: alpine, puntos: 27, victorias: 0, podios: 0, fecha_nacimiento: '2003-12-15' , categoria:"F1"},
-      { nombre: 'Liam Lawson', numero: 30, nacionalidad: 'Neozelandés', escuderia: racingBulls, puntos: 77, victorias: 0, podios: 0, fecha_nacimiento: '2000-01-01', categoria:"F1" },
+      { nombre: 'Liam Lawson', numero: 30, nacionalidad: 'Neozelandés', escuderia: racingBulls, puntos: 85, victorias: 0, podios: 0, fecha_nacimiento: '2000-01-01', categoria:"F1" },
       { nombre: 'Arvid Linblad', numero: 41, nacionalidad: 'Británica', escuderia: racingBulls, puntos: 38, victorias: 0, podios: 0, fecha_nacimiento: '2001-01-01', categoria:"F1" },
-      { nombre: 'George Russell', numero: 63, nacionalidad: 'Británica', escuderia: mercedes, puntos: 242, victorias: 3, podios: 8, fecha_nacimiento: '1998-02-15' , categoria:"F1"},
-      { nombre: 'Kimi Antonelli', numero: 12, nacionalidad: 'Italiana', escuderia: mercedes, puntos: 365, victorias: 9, podios: 15, fecha_nacimiento: '2000-01-01' , categoria:"F1"},
-      { nombre: 'Max Verstappen', numero: 3, nacionalidad: 'Neerlandesa', escuderia: redBull, puntos: 236, victorias: 3, podios: 11, fecha_nacimiento: '1997-09-30', categoria:"F1" },
+      { nombre: 'George Russell', numero: 63, nacionalidad: 'Británica', escuderia: mercedes, puntos: 250, victorias: 3, podios: 8, fecha_nacimiento: '1998-02-15' , categoria:"F1"},
+      { nombre: 'Kimi Antonelli', numero: 12, nacionalidad: 'Italiana', escuderia: mercedes, puntos: 380, victorias: 9, podios: 16, fecha_nacimiento: '2000-01-01' , categoria:"F1"},
+      { nombre: 'Max Verstappen', numero: 3, nacionalidad: 'Neerlandesa', escuderia: redBull, puntos: 261, victorias: 4, podios: 12, fecha_nacimiento: '1997-09-30', categoria:"F1" },
       { nombre: 'Isack Hadjar', numero: 6, nacionalidad: 'Francesa', escuderia: redBull, puntos: 105, victorias: 0, podios: 2, fecha_nacimiento: '2000-01-01', categoria:"F1" },
-      { nombre: 'Lando Norris', numero: 1, nacionalidad: 'Británica', escuderia: mclaren, puntos: 211, victorias: 2, podios: 5, fecha_nacimiento: '1999-11-13', categoria:"F1" },
+      { nombre: 'Lando Norris', numero: 1, nacionalidad: 'Británica', escuderia: mclaren, puntos: 221, victorias: 2, podios: 5, fecha_nacimiento: '1999-11-13', categoria:"F1" },
       { nombre: 'Oscar Piastri', numero: 81, nacionalidad: 'Australiana', escuderia: mclaren, puntos: 144, victorias: 0, podios: 2, fecha_nacimiento: '2001-04-26', categoria:"F1"},
-      { nombre: 'Lewis Hamilton', numero: 44, nacionalidad: 'Británica', escuderia: ferrari, puntos: 241, victorias: 1, podios: 7, fecha_nacimiento: '1985-01-07' , categoria:"F1"},
-      { nombre: 'Charles Leclerc', numero: 16, nacionalidad: 'Monegasca', escuderia: ferrari, puntos: 233, victorias: 1, podios: 7, fecha_nacimiento: '1997-10-28', categoria:"F1" },
+      { nombre: 'Lewis Hamilton', numero: 44, nacionalidad: 'Británica', escuderia: ferrari, puntos: 252, victorias: 1, podios: 8, fecha_nacimiento: '1985-01-07' , categoria:"F1"},
+      { nombre: 'Charles Leclerc', numero: 16, nacionalidad: 'Monegasca', escuderia: ferrari, puntos: 245, victorias: 1, podios: 7, fecha_nacimiento: '1997-10-28', categoria:"F1" },
       { nombre: 'Carlos Sainz', numero: 55, nacionalidad: 'Española', escuderia: williams, puntos: 7, victorias: 0, podios: 0, fecha_nacimiento: '1994-09-01', categoria:"F1" },
       { nombre: 'Alexander Albon', numero: 23, nacionalidad: 'Tahilandesa/Británica', escuderia: williams, puntos: 5, victorias: 0, podios: 0, fecha_nacimiento: '1995-03-23', categoria:"F1" },
       { nombre: 'Fernando Alonso', numero: 14, nacionalidad: 'Española', escuderia: astonMartin, puntos: 7, victorias: 0, podios: 0, fecha_nacimiento: '1981-07-29', categoria:"F1" },
       { nombre: 'Lance Stroll', numero: 18, nacionalidad: 'Canadiense', escuderia: astonMartin, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1998-06-23', categoria:"F1" },
       { nombre: "Sergio 'Checo' Perez", numero: 11, nacionalidad: 'Mexicana', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1990-07-26', categoria:"F1" },
-      { nombre: 'Valtteri Bottas', numero: 77, nacionalidad: 'Finlandesa', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1989-08-28', categoria:"F1" }
+      { nombre: 'Valtteri Bottas', numero: 77, nacionalidad: 'Finlandesa', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1989-08-28', categoria:"F1" },
+      { nombre: "Yuki Tsunoda", numero:22, nacionalidad: "Japonesa", escuderia: racingBulls, puntos:1 , victorias:0, podios:0,fecha_nacimiento:"2000-05-11", categoria:"F1"},
+      { nombre: "Ryo Harikawa", numero:50, nacionalidad: "Japonesa", escuderia: haas, puntos:1 , victorias:0, podios:0,fecha_nacimiento:"1994-03-07", categoria:"F1"}
     ];
     const roles = await Rol.insertMany(rolesData);
     const admin = roles.find((e) => e.nombre ==="Admin");

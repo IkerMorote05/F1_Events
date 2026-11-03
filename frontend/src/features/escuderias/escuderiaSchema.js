@@ -11,6 +11,8 @@ export const escuderiaSchema = z.object({
   nombre: z.string().trim().min(1, 'El nombre es obligatorio'),
   pais: z.string().trim().min(1, 'El país es obligatorio'),
   motor: z.string().trim().min(1, 'El motor es obligatorio'),
+  categoria: z.string().min(1, 'Selecciona una categoría'),
+  siglas: z.string().trim().optional(),
   jefe: z.string().trim().optional(),
   año: optionalInteger('El año', 1900)
 });

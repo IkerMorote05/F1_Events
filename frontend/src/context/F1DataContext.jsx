@@ -1,86 +1,89 @@
-import { createContext, useCallback } from 'react';
-import {
-  createEscuderia,
-  deleteEscuderia,
-  getEscuderiasAdmin,
-  updateEscuderia
-} from '../services/escuderiaService';
-import {
-  createCircuito,
-  deleteCircuito,
-  getCircuitosAdmin,
-  updateCircuito
-} from '../services/circuitoService';
-import {
-  createCarrera,
-  deleteCarrera,
-  getCarrerasAdmin,
-  updateCarrera
-} from '../services/carreraService';
-import {
-  createPiloto,
-  deletePiloto,
-  getPilotosAdmin,
-  updatePiloto
-} from '../services/pilotoService';
-import { useCollection } from '../hooks/useCollection';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getEscuderiasAdmin } from '../services/escuderiaService';
+import { getPilotosAdmin } from '../services/pilotoService';
 
 export const F1DataContext = createContext(null);
 
 export const F1DataProvider = ({ children }) => {
-  const pilotos = useCollection({
-    fetchAll: getPilotosAdmin,
-    create: createPiloto,
-    update: updatePiloto,
-    remove: deletePiloto,
-    resourceName: 'pilotos',
-    listKey: 'pilotos',
-    errorMessage: 'No se pudieron cargar los datos.'
+  const [pilotos, setPilotos] = useState({
+    items: [],
+    loading: true,
+    error: null
   });
-  const escuderias = useCollection({
-    fetchAll: getEscuderiasAdmin,
-    create: createEscuderia,
-    update: updateEscuderia,
-    remove: deleteEscuderia,
-    resourceName: 'escuderías',
-    listKey: 'escuderias',
-    errorMessage: 'No se pudieron cargar las escuderías.'
+  const [escuderias, setEscuderias] = useState({
+    items: [],
+    loading: true,
+    error: null
   });
-  const circuitos = useCollection({
-    fetchAll: getCircuitosAdmin,
-    create: createCircuito,
-    update: updateCircuito,
-    remove: deleteCircuito,
-    resourceName: 'circuitos',
-    listKey: 'circuitos',
-    errorMessage: 'No se pudieron cargar los circuitos.'
-  });
-  const carreras = useCollection({
-    fetchAll: getCarrerasAdmin,
-    create: createCarrera,
-    update: updateCarrera,
-    remove: deleteCarrera,
-    resourceName: 'carreras',
-    listKey: 'carreras',
-    errorMessage: 'No se pudieron cargar las carreras.'
-  });
-  const loadPilotos = useCallback(() => pilotos.reload(), [pilotos.reload]);
-  const loadEscuderias = useCallback(() => escuderias.reload(), [escuderias.reload]);
-  const loadCircuitos = useCallback(() => circuitos.reload(), [circuitos.reload]);
-  const loadCarreras = useCallback(() => carreras.reload(), [carreras.reload]);
-  const pilotosContext = { ...pilotos, load: loadPilotos };
-  const escuderiasContext = { ...escuderias, load: loadEscuderias };
-  const circuitosContext = { ...circuitos, load: loadCircuitos };
-  const carrerasContext = { ...carreras, load: loadCarreras };
+  const loaded = useRef({ pilotos: false, escuderias: false });
+  const pending = useRef({ pilotos: null, escuderias: null });
 
-  return (
-    <F1DataContext.Provider value={{
-      pilotos: pilotosContext,
-      escuderias: escuderiasContext,
-      circuitos: circuitosContext,
-      carreras: carrerasContext
-    }}>
-      {children}
-    </F1DataContext.Provider>
-  );
+  const loadPilotos = useCallback(async ({ force = false } = {}) => {
+    if (pending.current.pilotos) return pending.current.pilotos;
+    if (loaded.current.pilotos && !force) return;
+
+    setPilotos((current) => ({ ...current, loading: true, error: null }));
+    const request = getPilotosAdmin()
+      .then((response) => {
+        const items = Array.isArray(response) ? response : response?.data || response?.pilotos || [];
+        setPilotos({ items, loading: false, error: null });
+        loaded.current.pilotos = true;
+      })
+      .catch((requestError) => {
+        console.error('Error al cargar pilotos:', requestError);
+        setPilotos((current) => ({
+          ...current,
+          loading: false,
+          error: 'No se pudieron cargar los datos.'
+        }));
+      })
+      .finally(() => {
+        pending.current.pilotos = null;
+      });
+
+    pending.current.pilotos = request;
+    return request;
+  }, []);
+
+  const loadEscuderias = useCallback(async ({ force = false } = {}) => {
+    if (pending.current.escuderias) return pending.current.escuderias;
+    if (loaded.current.escuderias && !force) return;
+
+    setEscuderias((current) => ({ ...current, loading: true, error: null }));
+    const request = getEscuderiasAdmin()
+      .then((response) => {
+        const items = Array.isArray(response) ? response : response?.data || response?.escuderias || [];
+        setEscuderias({ items, loading: false, error: null });
+        loaded.current.escuderias = true;
+      })
+      .catch((requestError) => {
+        console.error('Error al cargar escuderías:', requestError);
+        setEscuderias((current) => ({
+          ...current,
+          loading: false,
+          error: 'No se pudieron cargar las escuderías.'
+        }));
+      })
+      .finally(() => {
+        pending.current.escuderias = null;
+      });
+
+    pending.current.escuderias = request;
+    return request;
+  }, []);
+
+  const refreshPilotos = useCallback(() => loadPilotos({ force: true }), [loadPilotos]);
+  const refreshEscuderias = useCallback(() => loadEscuderias({ force: true }), [loadEscuderias]);
+
+  useEffect(() => {
+    loadPilotos();
+    loadEscuderias();
+  }, [loadPilotos, loadEscuderias]);
+
+  const value = useMemo(() => ({
+    pilotos: { ...pilotos, reload: refreshPilotos, load: refreshPilotos },
+    escuderias: { ...escuderias, reload: refreshEscuderias, load: refreshEscuderias }
+  }), [pilotos, escuderias, refreshPilotos, refreshEscuderias]);
+
+  return <F1DataContext.Provider value={value}>{children}</F1DataContext.Provider>;
 };

@@ -8,7 +8,7 @@ export const getEscuderiasAdmin = async () => (
 ).data;
 export const getEscuderiaById = async (id) => getResponseData(await apiService.get(`/escuderias/${id}`));
 export const createEscuderia = async (data) => getResponseData(await apiService.post('/escuderias', data));
-export const updateEscuderia = async (id, data) => getResponseData(await apiService.put(`/escuderias/${id}`, data));
+export const updateEscuderia = async (id, data) => getResponseData(await apiService.patch(`/escuderias/${id}`, data));
 export const deleteEscuderia = async (slug) => getResponseData(
   await apiService.patch(`/escuderias/${slug}/soft-delete`)
 );
