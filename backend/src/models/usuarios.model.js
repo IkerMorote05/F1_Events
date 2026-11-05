@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
+const Image = require('./image.model');
 
 const usuarioSchema = new mongoose.Schema(
     {
@@ -59,8 +60,17 @@ const usuarioSchema = new mongoose.Schema(
             createdAt: 'createdAt',
             updatedAt: 'lastUpdate',
             },
+            toJSON: { virtuals: true },
         }
 );
+
+usuarioSchema.virtual('images', {
+    ref: Image,
+    localField: '_id',
+    foreignField: 'entity_id',
+    match: { entity_type: 'Usuario', deletedAt: null },
+    options: { sort: { position: 1, _id: 1 } },
+});
 
 usuarioSchema.pre('validate', function (next) {
     if (!this.slug && this.nombre && this.apellidos) {

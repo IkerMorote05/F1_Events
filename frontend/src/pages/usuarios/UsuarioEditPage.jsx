@@ -4,6 +4,7 @@ import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { UsuarioForm } from '../../features/usuarios/UsuarioForm';
 import { useUsuarios } from '../../hooks/useUsuarios';
+import { syncUsuarioImages } from '../../services/usuarioService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
@@ -32,10 +33,17 @@ export const UsuarioEditPage = () => {
     loadUsuario();
   }, [loadUsuario]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     setSubmitting(true);
     try {
       await updateItem(id, payload);
+      try {
+        await syncUsuarioImages(id, images, usuario.images || []);
+      } catch (imageError) {
+        await loadUsuario();
+        await showApiError(imageError, 'El usuario se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showSuccess('Usuario actualizado correctamente');
       navigate('/usuarios');
     } catch (requestError) {

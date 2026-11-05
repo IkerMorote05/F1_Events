@@ -99,7 +99,8 @@ const seedDB = async () => {
       { nombre: "Sergio 'Checo' Perez", numero: 11, nacionalidad: 'Mexicana', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1990-07-26', categoria:"F1" },
       { nombre: 'Valtteri Bottas', numero: 77, nacionalidad: 'Finlandesa', escuderia: cadillac, puntos: 0, victorias: 0, podios: 0, fecha_nacimiento: '1989-08-28', categoria:"F1" },
       { nombre: "Yuki Tsunoda", numero:22, nacionalidad: "Japonesa", escuderia: racingBulls, puntos:1 , victorias:0, podios:0,fecha_nacimiento:"2000-05-11", categoria:"F1"},
-      { nombre: "Ryo Harikawa", numero:50, nacionalidad: "Japonesa", escuderia: haas, puntos:1 , victorias:0, podios:0,fecha_nacimiento:"1994-03-07", categoria:"F1"}
+      { nombre: "Ryo Harikawa", numero:50, nacionalidad: "Japonesa", escuderia: haas, puntos:1 , victorias:0, podios:0,fecha_nacimiento:"1994-03-07", categoria:"F1"},
+      { nombre: "Rafael Camara", numero:51, nacionalidad:"Brasileña", escuderia:haas, puntos:0, victorias:0, podios:0, fecha_nacimiento:"2005-05-05", categoria:"F1"}
     ];
     const roles = await Rol.insertMany(rolesData);
     const admin = roles.find((e) => e.nombre ==="Admin");

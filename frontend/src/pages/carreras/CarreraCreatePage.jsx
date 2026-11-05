@@ -5,6 +5,7 @@ import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { CarreraForm } from '../../features/carreras/CarreraForm';
 import { useCarreras } from '../../hooks/useCarreras';
 import { useCircuitos } from '../../hooks/useCircuitos';
+import { syncCarreraImages } from '../../services/carreraService';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
 export const CarreraCreatePage = () => {
@@ -14,10 +15,17 @@ export const CarreraCreatePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const circuitosDisponibles = circuitos.filter((circuito) => !circuito.deletedAt);
 
-  const handleCreate = async (payload) => {
+  const handleCreate = async (payload, images) => {
     setSubmitting(true);
     try {
-      await createItem(payload);
+      const carrera = await createItem(payload);
+      try {
+        await syncCarreraImages(carrera._id, images);
+      } catch (imageError) {
+        await showApiError(imageError, 'La carrera se creó, pero no se pudieron guardar todas las imágenes');
+        navigate(carrera._id ? `/carreras/${carrera._id}/editar` : '/carreras');
+        return;
+      }
       await showSuccess('Carrera creada correctamente');
       navigate('/carreras');
     } catch (requestError) {

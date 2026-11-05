@@ -20,3 +20,18 @@ export const pilotoSchema = z.object({
   categoria: z.string().min(1, 'Selecciona una categoría'),
   fecha_nacimiento: z.string().optional()
 });
+
+export const pilotoImageSchema = z.object({
+  _id: z.string().optional(),
+  image_url: z.string()
+    .trim()
+    .min(1, 'La URL de la imagen es obligatoria')
+    .refine((value) => {
+      try {
+        return ['http:', 'https:'].includes(new URL(value).protocol);
+      } catch {
+        return false;
+      }
+    }, 'Introduce una URL válida con protocolo HTTP o HTTPS'),
+  alt_text: z.string().trim().optional()
+});

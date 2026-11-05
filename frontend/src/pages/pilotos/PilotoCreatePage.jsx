@@ -5,6 +5,7 @@ import { PilotoForm } from '../../features/pilotos/PilotoForm';
 import { useCategoriasGlobales } from '../../hooks/useCategoriasGlobales';
 import { useEscuderias } from '../../hooks/useEscuderias';
 import { usePilotos } from '../../hooks/usePilotos';
+import { syncPilotoImages } from '../../services/pilotoService';
 import { showPilotoError, showPilotoSuccess } from '../../utils/sweetAlert';
 
 export const PilotoCreatePage = () => {
@@ -19,10 +20,17 @@ export const PilotoCreatePage = () => {
   } = useCategoriasGlobales();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleCreate = async (payload) => {
+  const handleCreate = async (payload, images) => {
     setSubmitting(true);
     try {
-      await createItem(payload);
+      const piloto = await createItem(payload);
+      try {
+        await syncPilotoImages(piloto._id, images);
+      } catch (imageError) {
+        await showPilotoError(imageError, 'El piloto se creó, pero no se pudieron guardar todas las imágenes');
+        navigate(piloto._id ? `/pilotos/${piloto._id}/editar` : '/pilotos');
+        return;
+      }
       await showPilotoSuccess('Piloto creado correctamente');
       navigate('/pilotos');
     } catch (requestError) {

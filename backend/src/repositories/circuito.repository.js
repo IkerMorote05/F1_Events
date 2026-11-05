@@ -6,7 +6,8 @@ class CircuitoRepository {
       .populate('location', 'pais ciudad capital slug')
       .populate('categoria', 'competicion')
       .populate('tipo', 'tipo')
-      .populate('desgaste', 'desgaste');
+      .populate('desgaste', 'desgaste')
+      .populate('images');
   }
 
   async findAll(includeDeleted = false) {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PilotoError } from '../../components/PilotoError';
 import { EscuderiaForm } from '../../features/escuderias/EscuderiaForm';
 import { useEscuderias } from '../../hooks/useEscuderias';
+import { syncEscuderiaImages } from '../../services/escuderiaService';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
 export const EscuderiaCreatePage = () => {
@@ -10,10 +11,17 @@ export const EscuderiaCreatePage = () => {
   const { createItem } = useEscuderias();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleCreate = async (payload) => {
+  const handleCreate = async (payload, images) => {
     setSubmitting(true);
     try {
-      await createItem(payload);
+      const escuderia = await createItem(payload);
+      try {
+        await syncEscuderiaImages(escuderia._id, images);
+      } catch (imageError) {
+        await showApiError(imageError, 'La escudería se creó, pero no se pudieron guardar todas las imágenes');
+        navigate(escuderia._id ? `/escuderias/${escuderia._id}/editar` : '/escuderias');
+        return;
+      }
       await showSuccess('Escudería creada correctamente');
       navigate('/escuderias');
     } catch (requestError) {

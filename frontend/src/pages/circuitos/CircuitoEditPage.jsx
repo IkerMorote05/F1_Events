@@ -7,6 +7,7 @@ import { useCategoriasCircuitos } from '../../hooks/useCategoriasCircuitos';
 import { useCategoriasGlobales } from '../../hooks/useCategoriasGlobales';
 import { useCircuitos } from '../../hooks/useCircuitos';
 import { useLocations } from '../../hooks/useLocations';
+import { syncCircuitoImages } from '../../services/circuitoService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
@@ -51,10 +52,17 @@ export const CircuitoEditPage = () => {
 
   useEffect(() => { loadCircuito(); }, [loadCircuito]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     setSubmitting(true);
     try {
       await updateItem(id, payload);
+      try {
+        await syncCircuitoImages(id, images, circuito.images || []);
+      } catch (imageError) {
+        await loadCircuito();
+        await showApiError(imageError, 'El circuito se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showSuccess('Circuito actualizado correctamente');
       navigate('/circuitos');
     } catch (requestError) {

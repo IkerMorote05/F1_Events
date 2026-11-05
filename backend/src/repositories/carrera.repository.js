@@ -6,7 +6,7 @@ class CarreraRepository {
       path: 'circuito',
       select: 'nombre slug location',
       populate: { path: 'location', select: 'pais ciudad capital slug' },
-    });
+    }).populate('images');
   }
 
   async findAll(includeDeleted = false) {
@@ -35,7 +35,8 @@ class CarreraRepository {
   }
 
   async create(data) {
-    return Carrera.create(data);
+    const carrera = await Carrera.create(data);
+    return this.populateCircuito(Carrera.findById(carrera._id));
   }
 
   async update(id, data) {
@@ -46,43 +47,43 @@ class CarreraRepository {
   }
 
   async softDelete(id) {
-    return Carrera.findOneAndUpdate(
+    return this.populateCircuito(Carrera.findOneAndUpdate(
       { _id: id, deletedAt: null },
       { deletedAt: new Date() },
       { new: true }
-    );
+    ));
   }
 
   async softDeleteBySlug(slug) {
-    return Carrera.findOneAndUpdate(
+    return this.populateCircuito(Carrera.findOneAndUpdate(
       { slug, deletedAt: null },
       { deletedAt: new Date() },
       { new: true }
-    );
+    ));
   }
 
   async setIsActiveBySlug(slug, isActive) {
-    return Carrera.findOneAndUpdate(
+    return this.populateCircuito(Carrera.findOneAndUpdate(
       { slug, deletedAt: null },
       { isActive },
       { new: true, runValidators: true }
-    );
+    ));
   }
 
   async changeStatusBySlug(slug, status) {
-    return Carrera.findOneAndUpdate(
+    return this.populateCircuito(Carrera.findOneAndUpdate(
       { slug, deletedAt: null },
       { status },
       { new: true, runValidators: true }
-    );
+    ));
   }
 
   async restoreBySlug(slug) {
-    return Carrera.findOneAndUpdate(
+    return this.populateCircuito(Carrera.findOneAndUpdate(
       { slug, deletedAt: { $ne: null } },
       { deletedAt: null },
       { new: true }
-    );
+    ));
   }
 }
 

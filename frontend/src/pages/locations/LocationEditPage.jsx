@@ -4,6 +4,7 @@ import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { LocationForm } from '../../features/locations/LocationForm';
 import { useLocations } from '../../hooks/useLocations';
+import { syncLocationImages } from '../../services/locationService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
@@ -32,10 +33,17 @@ export const LocationEditPage = () => {
     loadLocation();
   }, [loadLocation]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     setSubmitting(true);
     try {
       await updateItem(id, payload);
+      try {
+        await syncLocationImages(id, images, location.images || []);
+      } catch (imageError) {
+        await loadLocation();
+        await showApiError(imageError, 'La ubicación se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showSuccess('Ubicación actualizada correctamente');
       navigate('/locations');
     } catch (requestError) {

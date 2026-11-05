@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
+const Image = require('./image.model');
 
 const locationSchema = new mongoose.Schema(
   {
@@ -43,6 +44,14 @@ const locationSchema = new mongoose.Schema(
     },
   }
 );
+
+locationSchema.virtual('images', {
+  ref: Image,
+  localField: '_id',
+  foreignField: 'entity_id',
+  match: { entity_type: 'Location', deletedAt: null },
+  options: { sort: { position: 1, _id: 1 } },
+});
 
 locationSchema.pre('validate', function (next) {
   if (!this.slug && this.ciudad) {

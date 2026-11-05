@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
+const Image = require('./image.model');
 
 const pilotoSchema = new mongoose.Schema(
   {
@@ -64,8 +65,19 @@ const pilotoSchema = new mongoose.Schema(
       trim: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+  }
 );
+
+pilotoSchema.virtual('images', {
+  ref: Image,
+  localField: '_id',
+  foreignField: 'entity_id',
+  match: { entity_type: 'Piloto', deletedAt: null },
+  options: { sort: { position: 1, _id: 1 } },
+});
 
 pilotoSchema.pre('validate', function (next) {
   if (!this.slug && this.nombre) {

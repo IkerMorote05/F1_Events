@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
+const Image = require('./image.model');
 
 const vueltaRapidaSchema = new mongoose.Schema(
   {
@@ -81,8 +82,17 @@ const circuitoSchema = new mongoose.Schema(
       createdAt: 'createdAt',
       updatedAt: 'lastUpdate',
     },
+    toJSON: { virtuals: true },
   }
 );
+
+circuitoSchema.virtual('images', {
+  ref: Image,
+  localField: '_id',
+  foreignField: 'entity_id',
+  match: { entity_type: 'Circuito', deletedAt: null },
+  options: { sort: { position: 1, _id: 1 } },
+});
 
 circuitoSchema.pre('validate', function (next) {
   if (!this.slug && this.nombre) {

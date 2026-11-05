@@ -11,3 +11,18 @@ export const carreraSchema = z.object({
     .pipe(z.number().int().min(0, 'La capacidad no puede ser negativa')),
   circuito: z.string().min(1, 'Selecciona un circuito')
 });
+
+export const carreraImageSchema = z.object({
+  _id: z.string().optional(),
+  image_url: z.string()
+    .trim()
+    .min(1, 'La URL de la imagen es obligatoria')
+    .refine((value) => {
+      try {
+        return ['http:', 'https:'].includes(new URL(value).protocol);
+      } catch {
+        return false;
+      }
+    }, 'Introduce una URL válida con protocolo HTTP o HTTPS'),
+  alt_text: z.string().trim().optional()
+});

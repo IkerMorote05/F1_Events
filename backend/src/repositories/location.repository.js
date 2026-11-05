@@ -3,7 +3,7 @@ const CrudRepository = require('./crud.repository');
 
 class LocationRepository extends CrudRepository {
   constructor() {
-    super(Location);
+    super(Location, ['images']);
   }
 }
 

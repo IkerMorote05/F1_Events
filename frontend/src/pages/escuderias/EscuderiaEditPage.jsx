@@ -4,6 +4,7 @@ import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { EscuderiaForm } from '../../features/escuderias/EscuderiaForm';
 import { useEscuderias } from '../../hooks/useEscuderias';
+import { syncEscuderiaImages } from '../../services/escuderiaService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
@@ -32,10 +33,17 @@ export const EscuderiaEditPage = () => {
     loadEscuderia();
   }, [loadEscuderia]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     setSubmitting(true);
     try {
       await updateItem(id, payload);
+      try {
+        await syncEscuderiaImages(id, images, escuderia.images || []);
+      } catch (imageError) {
+        await loadEscuderia();
+        await showApiError(imageError, 'La escudería se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showSuccess('Escudería actualizada correctamente');
       navigate('/escuderias');
     } catch (requestError) {

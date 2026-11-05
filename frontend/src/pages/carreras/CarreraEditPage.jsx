@@ -5,6 +5,7 @@ import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { CarreraForm } from '../../features/carreras/CarreraForm';
 import { useCarreras } from '../../hooks/useCarreras';
 import { useCircuitos } from '../../hooks/useCircuitos';
+import { syncCarreraImages } from '../../services/carreraService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
@@ -36,7 +37,7 @@ export const CarreraEditPage = () => {
 
   useEffect(() => { loadCarrera(); }, [loadCarrera]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     const circuitoOriginal = carrera?.circuito?._id || carrera?.circuito;
     const { circuito: circuitoSeleccionado, ...datosSinCircuito } = payload;
     const updatePayload = String(circuitoSeleccionado) === String(circuitoOriginal)
@@ -45,6 +46,13 @@ export const CarreraEditPage = () => {
     setSubmitting(true);
     try {
       await updateItem(id, updatePayload);
+      try {
+        await syncCarreraImages(id, images, carrera.images || []);
+      } catch (imageError) {
+        await loadCarrera();
+        await showApiError(imageError, 'La carrera se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showSuccess('Carrera actualizada correctamente');
       navigate('/carreras');
     } catch (requestError) {

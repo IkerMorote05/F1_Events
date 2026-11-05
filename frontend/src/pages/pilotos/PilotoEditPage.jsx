@@ -6,6 +6,7 @@ import { PilotoForm } from '../../features/pilotos/PilotoForm';
 import { useCategoriasGlobales } from '../../hooks/useCategoriasGlobales';
 import { useEscuderias } from '../../hooks/useEscuderias';
 import { usePilotos } from '../../hooks/usePilotos';
+import { syncPilotoImages } from '../../services/pilotoService';
 import { normalizeApiError } from '../../utils/errorHandler';
 import { showPilotoError, showPilotoSuccess } from '../../utils/sweetAlert';
 
@@ -41,10 +42,17 @@ export const PilotoEditPage = () => {
     loadPiloto();
   }, [loadPiloto]);
 
-  const handleUpdate = async (payload) => {
+  const handleUpdate = async (payload, images) => {
     setSubmitting(true);
     try {
       await updateItem(id, payload);
+      try {
+        await syncPilotoImages(id, images, piloto.images || []);
+      } catch (imageError) {
+        await loadPiloto();
+        await showPilotoError(imageError, 'El piloto se actualizó, pero no se pudieron guardar todas las imágenes');
+        return;
+      }
       await showPilotoSuccess('Piloto actualizado correctamente');
       navigate('/pilotos');
     } catch (requestError) {

@@ -6,6 +6,7 @@ import { useCategoriasCircuitos } from '../../hooks/useCategoriasCircuitos';
 import { useCategoriasGlobales } from '../../hooks/useCategoriasGlobales';
 import { useCircuitos } from '../../hooks/useCircuitos';
 import { useLocations } from '../../hooks/useLocations';
+import { syncCircuitoImages } from '../../services/circuitoService';
 import { showApiError, showSuccess } from '../../utils/sweetAlert';
 
 export const CircuitoCreatePage = () => {
@@ -31,10 +32,17 @@ export const CircuitoCreatePage = () => {
   } = useCategoriasCircuitos();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleCreate = async (payload) => {
+  const handleCreate = async (payload, images) => {
     setSubmitting(true);
     try {
-      await createItem(payload);
+      const circuito = await createItem(payload);
+      try {
+        await syncCircuitoImages(circuito._id, images);
+      } catch (imageError) {
+        await showApiError(imageError, 'El circuito se creó, pero no se pudieron guardar todas las imágenes');
+        navigate(circuito._id ? `/circuitos/${circuito._id}/editar` : '/circuitos');
+        return;
+      }
       await showSuccess('Circuito creado correctamente');
       navigate('/circuitos');
     } catch (requestError) {
