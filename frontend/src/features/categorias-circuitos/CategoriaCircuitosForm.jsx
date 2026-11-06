@@ -8,7 +8,13 @@ export const CategoriaCircuitosForm = ({ initialData, submitting, onSubmit, onCa
   const fieldLocked = Boolean(initialData);
 
   useEffect(() => {
-    const initialField = initialData?.tipo ? 'tipo' : 'desgaste';
+    const initialField = initialData?.tipo
+      ? 'tipo'
+      : initialData?.desgaste
+        ? 'desgaste'
+        : initialData?.categoriaEntrada
+          ? 'categoriaEntrada'
+          : 'categoriaGrada';
     setField(initialData ? initialField : 'tipo');
     setValue(initialData?.[initialField] || '');
     setError('');
@@ -38,10 +44,18 @@ export const CategoriaCircuitosForm = ({ initialData, submitting, onSubmit, onCa
       >
         <option value="tipo">Tipo de circuito</option>
         <option value="desgaste">Desgaste</option>
+        <option value="categoriaEntrada">Categoría de entrada</option>
+        <option value="categoriaGrada">Categoría de grada</option>
       </select>
 
       <label htmlFor="categoria-circuitos-value">
-        {field === 'tipo' ? 'Tipo' : 'Nivel de desgaste'}
+        {field === 'tipo'
+          ? 'Tipo'
+          : field === 'desgaste'
+            ? 'Nivel de desgaste'
+            : field === 'categoriaEntrada'
+              ? 'Categoría de entrada'
+              : 'Categoría de grada'}
       </label>
       <input
         id="categoria-circuitos-value"

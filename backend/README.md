@@ -26,6 +26,14 @@ npm run dev
    npm run dev
    ```
 
-La migración completa `createdAt`, `updatedAt`, `deletedAt`, `isActive`, `status` y `slug` en los documentos de pilotos y escuderías, sin reemplazar sus otros campos. Es idempotente y puede ejecutarse de nuevo.
+La migración completa los datos heredados de las entidades existentes y garantiza el índice único del SKU de tipos de entrada. Es idempotente y puede ejecutarse de nuevo.
+
+## Tipos de entrada
+
+El endpoint `/api/ticket-types` permite consultar, crear, actualizar y eliminar lógicamente tipos de entrada. Cada tipo requiere un SKU único generado automáticamente, referencias a un circuito, una carrera y una variante válida, un precio base diario no negativo (el campo `price` en las solicitudes) y una duración entera de 1 a 3 días. La propiedad `category` referencia una variante que debe tener categorías de entrada y grada. El precio devuelto (`price`) se calcula como precio base diario × duración + precio de la variante; `basePrice` conserva el precio diario para ediciones. Las relaciones se devuelven pobladas y se envían como IDs de MongoDB al crear o actualizar.
+
+Las variantes (`/api/variants`) generan el SKU a partir de sus categorías y requieren precio no negativo, porcentaje y referencias a categorías `categoriaEntrada` y `categoriaGrada` existentes. Los tipos de entrada usan `category` para referenciar una variante. El formulario de categorías de circuitos permite administrar ambas clases.
+
+Las variantes también admiten `descripcion` y un `percentage` entre 0 y 100 (hasta dos decimales). En cada circuito, las variantes asociadas mediante tipos de entrada deben sumar exactamente 100 % para mostrar disponibilidad. El porcentaje se aplica a la capacidad de cada carrera y la distribución de unidades enteras usa el método de mayores restos para que las cantidades de variantes sumen la capacidad de la carrera. Los tipos de entrada muestran su asignación individual (cada tipo conserva su propio stock); la variante muestra el total de sus asignaciones por circuito. Mientras el total no sea exactamente 100 %, la disponibilidad se indica como pendiente de configuración.
 
 > `npm run seed` elimina y vuelve a insertar los datos de prueba. No lo ejecutes si necesitas conservar los datos actuales.

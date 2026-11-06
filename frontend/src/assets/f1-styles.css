@@ -599,7 +599,8 @@ button:disabled {
 }
 
 .piloto-form input,
-.piloto-form select {
+.piloto-form select,
+.piloto-form textarea {
   box-sizing: border-box;
   min-width: 0;
   width: 100%;
@@ -614,12 +615,14 @@ button:disabled {
 
 
 .piloto-form input:hover,
-.piloto-form select:hover {
+.piloto-form select:hover,
+.piloto-form textarea:hover {
   border-color: rgba(243, 243, 243, 0.24);
 }
 
 .piloto-form input:focus,
-.piloto-form select:focus {
+.piloto-form select:focus,
+.piloto-form textarea:focus {
   border-color: rgba(225, 6, 0, 0.8);
   background-color: rgba(21, 21, 30, 0.95);
 }
@@ -677,6 +680,25 @@ button:disabled {
   color: #ff8b8b;
   font-size: 0.9rem;
   grid-column: 1 / -1;
+}
+
+.piloto-field-hint {
+  grid-column: 1 / -1;
+  color: #dedee2;
+  font-size: 0.9rem;
+}
+
+.piloto-field-hint p {
+  margin: 0.15rem 0;
+}
+
+.piloto-availability-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.piloto-availability-list li + li {
+  margin-top: 0.25rem;
 }
 
 .piloto-images-section {

@@ -1,5 +1,6 @@
 const CategoriaCircuitos = require('../models/categoria-circuitos.model');
 const Circuito = require('../models/circuito.model');
+const Variant = require('../models/variant.model');
 const CrudRepository = require('./crud.repository');
 
 class CategoriaCircuitosRepository extends CrudRepository {
@@ -15,8 +16,23 @@ class CategoriaCircuitosRepository extends CrudRepository {
     return CategoriaCircuitos.findOne({ desgaste });
   }
 
-  isReferencedBy(field, id) {
-    return Circuito.exists({ [field]: id });
+  findByCategoriaEntrada(categoriaEntrada) {
+    return CategoriaCircuitos.findOne({ categoriaEntrada });
+  }
+
+  findByCategoriaGrada(categoriaGrada) {
+    return CategoriaCircuitos.findOne({ categoriaGrada });
+  }
+
+  async isReferencedBy(field, id) {
+    const [circuit, variant] = await Promise.all([
+      Circuito.exists({ [field]: id }),
+      Variant.exists({
+        $or: [{ categoriaEntrada: id }, { categoriaGrada: id }],
+        deletedAt: null,
+      }),
+    ]);
+    return Boolean(circuit || variant);
   }
 }
 

@@ -11,6 +11,14 @@ const categoriaCircuitosSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    categoriaEntrada: {
+      type: String,
+      trim: true,
+    },
+    categoriaGrada: {
+      type: String,
+      trim: true,
+    },
     slug: {
       type: String,
       trim: true,
@@ -40,8 +48,17 @@ const categoriaCircuitosSchema = new mongoose.Schema(
 );
 
 categoriaCircuitosSchema.pre('validate', function (next) {
-  if (!this.slug && (this.desgaste || this.tipo)) {
-    this.slug = slugify(`${this.desgaste || ''}-${this.tipo || ''}`) || 'categoria-circuitos';
+  const categoryFields = ['tipo', 'desgaste', 'categoriaEntrada', 'categoriaGrada']
+    .filter((field) => this[field]);
+  if (categoryFields.length !== 1) {
+    this.invalidate(
+      'tipo',
+      'Debe indicar solo una clase de categoría: tipo, desgaste, categoría de entrada o categoría de grada'
+    );
+  }
+  if (!this.slug && categoryFields.length === 1) {
+    const field = categoryFields[0];
+    this.slug = slugify(`${field}-${this[field]}`) || 'categoria-circuitos';
   }
   next();
 });

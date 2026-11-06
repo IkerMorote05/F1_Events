@@ -148,7 +148,23 @@ const seedDB = async () => {
         desgaste,
         slug: `desgaste-${slugify(desgaste)}`,
       })),
+      { categoriaEntrada: 'General', slug: 'categoria-entrada-general' },
+      { categoriaEntrada: 'VIP', slug: 'categoria-entrada-vip' },
+      { categoriaEntrada: 'Hospitality', slug: 'categoria-entrada-hospitality' },
+      { categoriaGrada: 'Principal', slug: 'categoria-grada-principal' },
+      { categoriaGrada: 'Norte', slug: 'categoria-grada-norte' },
+      { categoriaGrada: 'Paddock', slug: 'categoria-grada-paddock' },
     ]);
+    const categoriasEntradaPorValor = new Map(
+      categoriasCircuitoCreadas
+        .filter(({ categoriaEntrada }) => categoriaEntrada)
+        .map(({ categoriaEntrada, _id }) => [categoriaEntrada, _id])
+    );
+    const categoriasGradaPorValor = new Map(
+      categoriasCircuitoCreadas
+        .filter(({ categoriaGrada }) => categoriaGrada)
+        .map(({ categoriaGrada, _id }) => [categoriaGrada, _id])
+    );
     const tiposCircuitoPorValor = new Map(
       categoriasCircuitoCreadas
         .filter(({ tipo }) => tipo)
@@ -169,9 +185,30 @@ const seedDB = async () => {
     );
 
     const variantsData = [
-      { sku: 'F1-CAP-RED-BULL', slug: 'f1-cap-red-bull' },
-      { sku: 'F1-MODEL-FERRARI', slug: 'f1-model-ferrari' },
-      { sku: 'F1-SHIRT-MCLAREN', slug: 'f1-shirt-mclaren' },
+      {
+        sku: 'entrada-general-grada-principal',
+        descripcion: 'Entrada general en grada principal',
+        price: 25,
+        percentage: 40,
+        categoriaEntrada: categoriasEntradaPorValor.get('General'),
+        categoriaGrada: categoriasGradaPorValor.get('Principal'),
+      },
+      {
+        sku: 'entrada-vip-grada-norte',
+        descripcion: 'Acceso VIP con asiento en grada norte',
+        price: 60,
+        percentage: 35,
+        categoriaEntrada: categoriasEntradaPorValor.get('VIP'),
+        categoriaGrada: categoriasGradaPorValor.get('Norte'),
+      },
+      {
+        sku: 'entrada-hospitality-grada-paddock',
+        descripcion: 'Acceso hospitality con vistas al paddock',
+        price: 120,
+        percentage: 25,
+        categoriaEntrada: categoriasEntradaPorValor.get('Hospitality'),
+        categoriaGrada: categoriasGradaPorValor.get('Paddock'),
+      },
     ];
     await Variant.insertMany(variantsData);
 

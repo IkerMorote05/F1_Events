@@ -10,7 +10,8 @@ import {
   Tags,
   Shield,
   MapPin,
-  Package
+  Package,
+  Ticket
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -65,6 +66,10 @@ export const Navbar = () => {
           <NavLink to="/variants" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
             <Package size={17} aria-hidden="true" />
             <span>Variantes</span>
+          </NavLink>
+          <NavLink to="/ticket-types" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Ticket size={17} aria-hidden="true" />
+            <span>Entradas</span>
           </NavLink>
         </div>
       </nav>

@@ -6,6 +6,7 @@ const Piloto = require('./models/piloto.model');
 const Location = require('./models/location.model');
 const Image = require('./models/image.model');
 const Variant = require('./models/variant.model');
+const TicketType = require('./models/ticket-type.model');
 const Usuario = require('./models/usuarios.model');
 const Rol = require('./models/roles.model');
 const CategoriaGlobal = require('./models/categoria-global.model');
@@ -277,6 +278,8 @@ const migrateExistingData = async () => {
         .join('-')
   );
   const variants = await migrateCollection(Variant, 'variant', (document) => document.sku);
+  await Variant.createIndexes();
+  await TicketType.createIndexes();
   const usuarios = await migrateCollection(
     Usuario,
     'usuario',
@@ -287,7 +290,7 @@ const migrateExistingData = async () => {
   const circuitos = await migrateCircuitLocations();
 
   console.log(
-    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, ${usuarios} usuarios y ${roles} roles revisados.`
+    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, índice único de SKU de tipos de entrada verificado, ${usuarios} usuarios y ${roles} roles revisados.`
   );
 };
 

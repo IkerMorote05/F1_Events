@@ -9,6 +9,40 @@ const variantSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    price: {
+      type: Number,
+      required: [true, 'El precio es obligatorio'],
+      min: [0, 'El precio no puede ser negativo'],
+      validate: {
+        validator: Number.isFinite,
+        message: 'El precio debe ser un número finito',
+      },
+    },
+    descripcion: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    percentage: {
+      type: Number,
+      required: [true, 'El porcentaje de disponibilidad es obligatorio'],
+      min: [0, 'El porcentaje no puede ser menor que 0'],
+      max: [100, 'El porcentaje no puede superar 100'],
+      validate: {
+        validator: Number.isFinite,
+        message: 'El porcentaje debe ser un número válido',
+      },
+    },
+    categoriaEntrada: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaCircuitos',
+      required: [true, 'La categoría de entrada es obligatoria'],
+    },
+    categoriaGrada: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CategoriaCircuitos',
+      required: [true, 'La categoría de grada es obligatoria'],
+    },
     slug: {
       type: String,
       trim: true,
@@ -31,6 +65,9 @@ const variantSchema = new mongoose.Schema(
     },
   }
 );
+
+variantSchema.index({ categoriaEntrada: 1 });
+variantSchema.index({ categoriaGrada: 1 });
 
 variantSchema.pre('validate', function (next) {
   if (!this.slug && this.sku) {

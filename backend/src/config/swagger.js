@@ -74,6 +74,7 @@ const swaggerDocument = {
     { name: 'Imágenes', description: 'Gestión de imágenes y sus entidades asociadas' },
     { name: 'Ubicaciones', description: 'Gestión de ubicaciones' },
     { name: 'Variantes', description: 'Gestión de variantes' },
+    { name: 'Tipos de entrada', description: 'Gestión de tipos de entrada' },
     { name: 'Usuarios', description: 'Gestión de usuarios' },
     { name: 'Roles', description: 'Gestión de roles' },
   ],
@@ -655,6 +656,60 @@ const swaggerDocument = {
         },
       },
     },
+    '/ticket-types': {
+      get: {
+        tags: ['Tipos de entrada'],
+        summary: 'Obtener tipos de entrada',
+        responses: {
+          200: apiResponse('Lista de tipos de entrada', {
+            type: 'array',
+            items: { $ref: '#/components/schemas/TicketType' },
+          }),
+        },
+      },
+      post: {
+        tags: ['Tipos de entrada'],
+        summary: 'Crear un tipo de entrada',
+        requestBody: requestBody('TicketTypeCreate', 'Datos del tipo de entrada'),
+        responses: {
+          201: apiResponse('Tipo de entrada creado', { $ref: '#/components/schemas/TicketType' }),
+          400: errorResponse,
+          409: errorResponse,
+        },
+      },
+    },
+    '/ticket-types/{identifier}': {
+      get: {
+        tags: ['Tipos de entrada'],
+        summary: 'Obtener un tipo de entrada por SKU o ID',
+        parameters: [{ ...slugParameter, name: 'identifier', description: 'SKU o ID de MongoDB' }],
+        responses: {
+          200: apiResponse('Tipo de entrada encontrado', { $ref: '#/components/schemas/TicketType' }),
+          404: errorResponse,
+        },
+      },
+      patch: {
+        tags: ['Tipos de entrada'],
+        summary: 'Actualizar un tipo de entrada por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        requestBody: requestBody('TicketTypeUpdate', 'Campos que se desean actualizar'),
+        responses: {
+          200: apiResponse('Tipo de entrada actualizado', { $ref: '#/components/schemas/TicketType' }),
+          400: errorResponse,
+          404: errorResponse,
+          409: errorResponse,
+        },
+      },
+      delete: {
+        tags: ['Tipos de entrada'],
+        summary: 'Eliminar lógicamente un tipo de entrada por ID',
+        parameters: [{ ...idParameter, name: 'identifier' }],
+        responses: {
+          200: apiResponse('Tipo de entrada eliminado', { $ref: '#/components/schemas/TicketType' }),
+          404: errorResponse,
+        },
+      },
+    },
     '/usuarios': {
       get: {
         tags: ['Usuarios'],
@@ -1129,6 +1184,32 @@ const swaggerDocument = {
           _id: { type: 'string' },
           slug: { type: 'string' },
           sku: { type: 'string' },
+          price: { type: 'number', format: 'double', minimum: 0 },
+          descripcion: { type: 'string' },
+          percentage: { type: 'number', minimum: 0, maximum: 100 },
+          availabilityByCircuit: {
+            type: 'array',
+            description: 'Disponibilidad agregada por circuito, cuando las variantes suman 100 %',
+            items: {
+              type: 'object',
+              properties: {
+                circuit: {
+                  type: 'object',
+                  properties: { _id: { type: 'string' }, nombre: { type: 'string' } },
+                },
+                capacity: { type: 'integer' },
+                percentageTotal: { type: 'number' },
+                configured: { type: 'boolean' },
+                availableQuantity: { type: 'integer', nullable: true },
+              },
+            },
+          },
+          categoriaEntrada: {
+            oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/CategoriaEntradaRef' }],
+          },
+          categoriaGrada: {
+            oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/CategoriaGradaRef' }],
+          },
           isActive: { type: 'boolean' },
           deletedAt: { type: 'string', format: 'date-time', nullable: true },
           createdAt: { type: 'string', format: 'date-time' },
@@ -1137,12 +1218,150 @@ const swaggerDocument = {
       },
       VariantCreate: {
         type: 'object',
-        required: ['sku'],
-        properties: { sku: { type: 'string' }, isActive: { type: 'boolean' } },
+        required: ['price', 'percentage', 'categoriaEntrada', 'categoriaGrada'],
+        properties: {
+          sku: { type: 'string', description: 'Se genera automáticamente según las categorías' },
+          price: { type: 'number', format: 'double', minimum: 0 },
+          descripcion: { type: 'string' },
+          percentage: { type: 'number', minimum: 0, maximum: 100 },
+          categoriaEntrada: { type: 'string', description: 'ID de una categoría de entrada' },
+          categoriaGrada: { type: 'string', description: 'ID de una categoría de grada' },
+          isActive: { type: 'boolean' },
+        },
       },
       VariantUpdate: {
         type: 'object',
-        properties: { sku: { type: 'string' }, isActive: { type: 'boolean' } },
+        properties: {
+          sku: { type: 'string' },
+          price: { type: 'number', format: 'double', minimum: 0 },
+          descripcion: { type: 'string' },
+          percentage: { type: 'number', minimum: 0, maximum: 100 },
+          categoriaEntrada: { type: 'string', description: 'ID de una categoría de entrada' },
+          categoriaGrada: { type: 'string', description: 'ID de una categoría de grada' },
+          isActive: { type: 'boolean' },
+        },
+      },
+      CategoriaEntradaRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          categoriaEntrada: { type: 'string' },
+          slug: { type: 'string' },
+        },
+      },
+      CategoriaGradaRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          categoriaGrada: { type: 'string' },
+          slug: { type: 'string' },
+        },
+      },
+      TicketType: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          id: { type: 'string' },
+          sku: { type: 'string', example: 'F1-MONACO-3D' },
+          circuit: {
+            oneOf: [
+              { type: 'string' },
+              {
+                type: 'object',
+                properties: {
+                  _id: { type: 'string' },
+                  nombre: { type: 'string' },
+                  slug: { type: 'string' },
+                  location: { type: 'string' },
+                },
+              },
+            ],
+            description: 'Circuito asociado',
+          },
+          race: {
+            oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/Carrera' }],
+            description: 'Carrera asociada',
+          },
+          price: {
+            type: 'number',
+            format: 'double',
+            minimum: 0,
+            description: 'Precio total con el extra de la variante incluido',
+          },
+          basePrice: {
+            type: 'number',
+            format: 'double',
+            minimum: 0,
+            description: 'Precio base por día, sin el extra de la variante',
+          },
+          availableQuantity: {
+            type: 'integer',
+            nullable: true,
+            description: 'Unidades asignadas en esta carrera cuando los porcentajes del circuito suman 100 %',
+          },
+          percentageTotal: { type: 'number' },
+          availabilityConfigured: { type: 'boolean' },
+          duration: { type: 'integer', minimum: 1, maximum: 3, example: 3 },
+          category: {
+            oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/VariantRef' }],
+            description: 'Variante asociada',
+          },
+          isActive: { type: 'boolean' },
+          deletedAt: { type: 'string', format: 'date-time', nullable: true },
+          status: { type: 'string', example: 'active' },
+          createdAt: { type: 'string', format: 'date-time' },
+          lastUpdate: { type: 'string', format: 'date-time' },
+        },
+      },
+      TicketTypeCreate: {
+        type: 'object',
+        required: ['circuit', 'race', 'price', 'duration', 'category'],
+        properties: {
+          sku: { type: 'string', minLength: 1, description: 'Se genera automáticamente según carrera, circuito, duración y variante' },
+          circuit: { type: 'string', description: 'ID de un circuito existente' },
+          race: { type: 'string', description: 'ID de una carrera existente' },
+          price: {
+            type: 'number',
+            format: 'double',
+            minimum: 0,
+            description: 'Precio base por día; se multiplica por duration y se suma el precio de la variante',
+          },
+          duration: { type: 'integer', minimum: 1, maximum: 3 },
+          category: { type: 'string', description: 'ID de una variante existente' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      TicketTypeUpdate: {
+        type: 'object',
+        minProperties: 1,
+        properties: {
+          sku: { type: 'string', minLength: 1 },
+          circuit: { type: 'string', description: 'ID de un circuito existente' },
+          race: { type: 'string', description: 'ID de una carrera existente' },
+          price: {
+            type: 'number',
+            format: 'double',
+            minimum: 0,
+            description: 'Nuevo precio base por día; se multiplica por duration y se suma el precio de la variante',
+          },
+          duration: { type: 'integer', minimum: 1, maximum: 3 },
+          category: { type: 'string', description: 'ID de una variante existente' },
+          isActive: { type: 'boolean' },
+          status: { type: 'string' },
+        },
+      },
+      VariantRef: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          sku: { type: 'string' },
+          price: { type: 'number', format: 'double' },
+          descripcion: { type: 'string' },
+          percentage: { type: 'number', minimum: 0, maximum: 100 },
+          categoriaEntrada: { $ref: '#/components/schemas/CategoriaEntradaRef' },
+          categoriaGrada: { $ref: '#/components/schemas/CategoriaGradaRef' },
+        },
       },
       Usuario: {
         type: 'object',

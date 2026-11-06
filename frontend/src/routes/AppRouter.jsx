@@ -42,6 +42,9 @@ const RolEditPage = lazy(() => import('../pages/roles/RolEditPage'));
 const VariantsListPage = lazy(() => import('../pages/variants/VariantsListPage'));
 const VariantCreatePage = lazy(() => import('../pages/variants/VariantCreatePage'));
 const VariantEditPage = lazy(() => import('../pages/variants/VariantEditPage'));
+const TicketTypesListPage = lazy(() => import('../pages/ticket-types/TicketTypesListPage'));
+const TicketTypeCreatePage = lazy(() => import('../pages/ticket-types/TicketTypeCreatePage'));
+const TicketTypeEditPage = lazy(() => import('../pages/ticket-types/TicketTypeEditPage'));
 const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPage'));
 const LocationCreatePage = lazy(() => import('../pages/locations/LocationCreatePage'));
 const LocationEditPage = lazy(() => import('../pages/locations/LocationEditPage'));
@@ -78,6 +81,9 @@ export const AppRouter = () => {
         <Route path="/variants" element={<VariantsListPage />} />
         <Route path="/variants/nueva" element={<VariantCreatePage />} />
         <Route path="/variants/:id/editar" element={<VariantEditPage />} />
+        <Route path="/ticket-types" element={<TicketTypesListPage />} />
+        <Route path="/ticket-types/nuevo" element={<TicketTypeCreatePage />} />
+        <Route path="/ticket-types/:id/editar" element={<TicketTypeEditPage />} />
         <Route path="/locations" element={<LocationsListPage />} />
         <Route path="/locations/nueva" element={<LocationCreatePage />} />
         <Route path="/locations/:id/editar" element={<LocationEditPage />} />

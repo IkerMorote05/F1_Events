@@ -90,12 +90,14 @@ const categoriaCircuitosCreate = z
   .object({
     desgaste: z.string().trim().min(1).optional(),
     tipo: z.string().trim().min(1).optional(),
+    categoriaEntrada: z.string().trim().min(1).optional(),
+    categoriaGrada: z.string().trim().min(1).optional(),
     isActive: z.boolean().optional(),
     status: z.string().optional(),
   })
   .passthrough()
-  .refine((data) => Boolean(data.tipo) !== Boolean(data.desgaste), {
-    message: 'Debe indicar solo un tipo o un desgaste',
+  .refine((data) => [data.tipo, data.desgaste, data.categoriaEntrada, data.categoriaGrada].filter(Boolean).length === 1, {
+    message: 'Debe indicar una sola clase: tipo, desgaste, categoría de entrada o categoría de grada',
     path: ['tipo'],
   });
 
@@ -103,12 +105,14 @@ const categoriaCircuitosUpdate = z
   .object({
     desgaste: z.string().trim().min(1).optional(),
     tipo: z.string().trim().min(1).optional(),
+    categoriaEntrada: z.string().trim().min(1).optional(),
+    categoriaGrada: z.string().trim().min(1).optional(),
     isActive: z.boolean().optional(),
     status: z.string().optional(),
   })
   .passthrough()
-  .refine((data) => !(data.tipo && data.desgaste), {
-    message: 'Debe indicar tipo o desgaste, no ambos',
+  .refine((data) => [data.tipo, data.desgaste, data.categoriaEntrada, data.categoriaGrada].filter(Boolean).length <= 1, {
+    message: 'Debe indicar como máximo una clase de categoría',
     path: ['tipo'],
   });
 
@@ -124,6 +128,25 @@ const carreraCreate = z
   .passthrough();
 
 const carreraUpdate = carreraCreate.partial();
+
+const ticketTypeCreate = z.object({
+  sku: z.string().trim().min(1).optional(),
+  circuit: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de circuito válido'),
+  race: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de carrera válido'),
+  price: nonNegativeNumericValue,
+  duration: numericValue.refine(
+    (value) => Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= 3,
+    'La duración debe ser un número entero de 1 a 3 días'
+  ),
+  category: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de variante válido'),
+  isActive: z.boolean().optional(),
+  status: z.string().optional(),
+});
+
+const ticketTypeUpdate = ticketTypeCreate.partial().refine(
+  (data) => Object.keys(data).length > 0,
+  'El payload debe incluir al menos un dato del tipo de entrada'
+);
 
 const locationCreate = z
   .object({
@@ -160,7 +183,24 @@ const imageUpdate = imageCreate.partial();
 
 const variantCreate = z
   .object({
-    sku: z.string().trim().min(1),
+    sku: z.string().trim().min(1).optional(),
+    price: nonNegativeNumericValue,
+    descripcion: z.string().trim().optional(),
+    percentage: numericValue.refine(
+      (value) => Number(value) >= 0 && Number(value) <= 100,
+      'El porcentaje debe estar entre 0 y 100'
+    ).refine(
+      (value) => Number.isInteger(Number(value) * 100),
+      'El porcentaje admite como máximo dos decimales'
+    ),
+    categoriaEntrada: z.string().refine(
+      mongoose.Types.ObjectId.isValid,
+      'Debe ser un ID de categoría de entrada válido'
+    ),
+    categoriaGrada: z.string().refine(
+      mongoose.Types.ObjectId.isValid,
+      'Debe ser un ID de categoría de grada válido'
+    ),
     isActive: z.boolean().optional(),
   })
   .passthrough();
@@ -228,6 +268,8 @@ module.exports = {
   categoriaCircuitosUpdate,
   carreraCreate,
   carreraUpdate,
+  ticketTypeCreate,
+  ticketTypeUpdate,
   locationCreate,
   locationUpdate,
   imageCreate,

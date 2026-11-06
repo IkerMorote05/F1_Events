@@ -30,7 +30,7 @@ export const CategoriasCircuitosListPage = () => {
   };
 
   const handleDelete = async (categoria) => {
-    const categoryName = categoria.tipo || categoria.desgaste;
+    const categoryName = categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada;
     if (!await confirmDeletion(`la categoría "${categoryName}"`)) return;
 
     try {
@@ -50,12 +50,20 @@ export const CategoriasCircuitosListPage = () => {
     {
       key: 'category',
       label: 'Categoría',
-      render: (categoria) => categoria.tipo || categoria.desgaste || 'Sin nombre'
+      render: (categoria) => (
+        categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada || 'Sin nombre'
+      )
     },
     {
       key: 'field',
       label: 'Clase',
-      render: (categoria) => categoria.tipo ? 'Tipo de circuito' : 'Desgaste'
+      render: (categoria) => categoria.tipo
+        ? 'Tipo de circuito'
+        : categoria.desgaste
+          ? 'Desgaste'
+          : categoria.categoriaEntrada
+            ? 'Categoría de entrada'
+            : 'Categoría de grada'
     },
     {
       key: 'status',
@@ -71,8 +79,8 @@ export const CategoriasCircuitosListPage = () => {
             disabled={deleted}
             aria-pressed={!deleted && active}
             aria-label={deleted
-              ? `Categoría ${categoria.tipo || categoria.desgaste} eliminada`
-              : `${active ? 'Desactivar' : 'Activar'} categoría ${categoria.tipo || categoria.desgaste}`}
+              ? `Categoría ${categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada} eliminada`
+              : `${active ? 'Desactivar' : 'Activar'} categoría ${categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada}`}
           >
             <Power size={15} aria-hidden="true" />
             {deleted ? 'Eliminada' : active ? 'Activa' : 'Inactiva'}
@@ -90,7 +98,7 @@ export const CategoriasCircuitosListPage = () => {
               type="button"
               className="btn-edit team-action-button"
               onClick={() => navigate(`/categorias-circuitos/${categoria._id}/editar`)}
-              aria-label={`Editar categoría ${categoria.tipo || categoria.desgaste}`}
+              aria-label={`Editar categoría ${categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada}`}
               title="Editar"
             >
               <Pencil size={16} aria-hidden="true" />
@@ -99,7 +107,7 @@ export const CategoriasCircuitosListPage = () => {
               type="button"
               className="btn-delete team-action-button"
               onClick={() => handleDelete(categoria)}
-              aria-label={`Eliminar categoría ${categoria.tipo || categoria.desgaste}`}
+              aria-label={`Eliminar categoría ${categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada}`}
               title="Eliminar"
             >
               <Trash2 size={16} aria-hidden="true" />
@@ -119,7 +127,7 @@ export const CategoriasCircuitosListPage = () => {
         <div>
           <p className="piloto-eyebrow">Administración</p>
           <h1>Categorías de circuitos</h1>
-          <p>Gestiona los tipos de circuito y niveles de desgaste.</p>
+          <p>Gestiona tipos de circuito, niveles de desgaste y categorías de entrada y grada.</p>
         </div>
         <button
           type="button"

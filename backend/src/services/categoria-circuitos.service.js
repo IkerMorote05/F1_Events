@@ -14,8 +14,18 @@ const validatePayload = (schema, payload) => {
   return result.data;
 };
 
-const categoryField = (data) => (data.tipo ? 'tipo' : 'desgaste');
+const categoryFields = ['tipo', 'desgaste', 'categoriaEntrada', 'categoriaGrada'];
+const categoryField = (data) => categoryFields.find((field) => data[field]);
 const categoryValue = (data, field) => data[field];
+const findCategoryByField = (field, value) => {
+  const repositoryMethod = {
+    tipo: 'findByTipo',
+    desgaste: 'findByDesgaste',
+    categoriaEntrada: 'findByCategoriaEntrada',
+    categoriaGrada: 'findByCategoriaGrada',
+  }[field];
+  return categoriaCircuitosRepository[repositoryMethod](value);
+};
 
 class CategoriaCircuitosService {
   obtenerTodas(includeDeleted = false) {
@@ -30,9 +40,7 @@ class CategoriaCircuitosService {
     const data = validatePayload(categoriaCircuitosCreate, payload);
     const field = categoryField(data);
     const value = categoryValue(data, field);
-    const existing = field === 'tipo'
-      ? await categoriaCircuitosRepository.findByTipo(value)
-      : await categoriaCircuitosRepository.findByDesgaste(value);
+    const existing = await findCategoryByField(field, value);
     if (existing) {
       throw new AppError(`Ya existe una categoría para ${field} "${value}"`, 400);
     }
@@ -51,20 +59,18 @@ class CategoriaCircuitosService {
   async actualizarCategoriaCircuitos(identifier, payload) {
     const current = await this.obtenerPorIdentificador(identifier);
     const data = validatePayload(categoriaCircuitosUpdate, payload);
-    const currentField = current.tipo ? 'tipo' : 'desgaste';
-    const field = data.tipo || data.desgaste ? categoryField(data) : currentField;
-    if (data.tipo || data.desgaste) {
+    const currentField = categoryField(current);
+    const field = categoryField(data) || currentField;
+    if (categoryField(data)) {
       if (field !== currentField) {
         throw new AppError(
-          'No se puede cambiar una categoría de tipo por una categoría de desgaste o viceversa',
+          'No se puede cambiar la clase de una categoría existente',
           400
         );
       }
 
       const value = categoryValue(data, field);
-      const existing = field === 'tipo'
-        ? await categoriaCircuitosRepository.findByTipo(value)
-        : await categoriaCircuitosRepository.findByDesgaste(value);
+      const existing = await findCategoryByField(field, value);
       if (existing && existing._id.toString() !== current._id.toString()) {
         throw new AppError(`Ya existe una categoría para ${field} "${value}"`, 400);
       }
@@ -88,9 +94,12 @@ class CategoriaCircuitosService {
 
   async eliminarCategoriaCircuitos(identifier) {
     const category = await this.obtenerPorIdentificador(identifier);
-    const field = category.tipo ? 'tipo' : 'desgaste';
+    const field = categoryField(category);
     if (await categoriaCircuitosRepository.isReferencedBy(field, category._id)) {
-      throw new AppError(`No se puede eliminar la categoría de ${field} porque hay circuitos asociados`, 400);
+      throw new AppError(
+        `No se puede eliminar la categoría de ${field} porque hay circuitos, tipos de entrada o variantes asociados`,
+        400
+      );
     }
     return categoriaCircuitosRepository.softDelete(category._id);
   }
