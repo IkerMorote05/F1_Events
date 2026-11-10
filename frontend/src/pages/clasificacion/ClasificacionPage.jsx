@@ -35,7 +35,7 @@ export const ClasificacionPage = () => {
               <th>Número</th>
               <th>Piloto</th>
               <th>Nacionalidad</th>
-              <th>Escudería</th>
+              <th>Escudería / Estado</th>
               <th>Puntos</th>
             </tr>
           </thead>
@@ -61,7 +61,9 @@ export const ClasificacionPage = () => {
                     piloto.nacionalidad || 'Sin asignar'
                   )}
                 </td>
-                <td>{piloto.escuderia?.nombre || 'Sin Escudería'}</td>
+                <td>{piloto.estado === 'compitiendo'
+                  ? piloto.escuderia?.nombre || 'Sin Escudería'
+                  : piloto.estado || 'compitiendo'}</td>
                 <td><strong>{piloto.puntos || 0} PTS</strong></td>
               </tr>
               );

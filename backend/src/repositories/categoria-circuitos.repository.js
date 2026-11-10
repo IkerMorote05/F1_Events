@@ -9,19 +9,19 @@ class CategoriaCircuitosRepository extends CrudRepository {
   }
 
   findByTipo(tipo) {
-    return CategoriaCircuitos.findOne({ tipo });
+    return CategoriaCircuitos.findOne({ tipo, deletedAt: null });
   }
 
   findByDesgaste(desgaste) {
-    return CategoriaCircuitos.findOne({ desgaste });
+    return CategoriaCircuitos.findOne({ desgaste, deletedAt: null });
   }
 
   findByCategoriaEntrada(categoriaEntrada) {
-    return CategoriaCircuitos.findOne({ categoriaEntrada });
+    return CategoriaCircuitos.findOne({ categoriaEntrada, deletedAt: null });
   }
 
   findByCategoriaGrada(categoriaGrada) {
-    return CategoriaCircuitos.findOne({ categoriaGrada });
+    return CategoriaCircuitos.findOne({ categoriaGrada, deletedAt: null });
   }
 
   async isReferencedBy(field, id) {

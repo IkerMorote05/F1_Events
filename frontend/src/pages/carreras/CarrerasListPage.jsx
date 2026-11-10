@@ -64,9 +64,10 @@ export const CarrerasListPage = () => {
     { key: 'fecha', label: 'Fecha', render: (carrera) => formatDate(carrera.fecha) },
     { key: 'circuito', label: 'Circuito', render: (carrera) => carrera.circuito?.nombre || 'Sin circuito' },
     { key: 'capacidad', label: 'Capacidad', render: (carrera) => Number(carrera.capacidad).toLocaleString('es-ES') },
+    { key: 'estado', label: 'Estado de la carrera', render: (carrera) => carrera.estado || 'En vigor' },
     {
-      key: 'estado',
-      label: 'Estado',
+      key: 'isActive',
+      label: 'Activo',
       render: (carrera) => {
         const deleted = Boolean(carrera.deletedAt);
         const active = carrera.isActive !== false;

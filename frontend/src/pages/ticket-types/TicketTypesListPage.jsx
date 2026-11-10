@@ -51,6 +51,7 @@ export const TicketTypesListPage = () => {
     { key: 'sku', label: 'SKU', render: (ticket) => ticket.sku || '—' },
     { key: 'circuit', label: 'Circuito', render: (ticket) => ticket.circuit?.nombre || '—' },
     { key: 'race', label: 'Carrera', render: (ticket) => ticket.race?.nombre || '—' },
+    { key: 'estado', label: 'Estado del ticket', render: (ticket) => ticket.estado || 'Disponible' },
     {
       key: 'price',
       label: 'Precio',
@@ -73,8 +74,8 @@ export const TicketTypesListPage = () => {
       render: (ticket) => `${ticket.availableQuantity ?? 0} entradas`
     },
     {
-      key: 'status',
-      label: 'Estado',
+      key: 'isActive',
+      label: 'Activo',
       render: (ticket) => {
         const deleted = Boolean(ticket.deletedAt);
         const active = ticket.isActive !== false;

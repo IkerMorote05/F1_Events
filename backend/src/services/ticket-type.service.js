@@ -111,6 +111,7 @@ class TicketTypeService {
 
   async crear(payload) {
     const data = parsePayload(ticketTypeCreate, payload);
+    data.estado = data.estado || 'Disponible';
     data.basePrice = Number(data.price);
     data.duration = Number(data.duration);
     const references = await this.validarReferencias(data);

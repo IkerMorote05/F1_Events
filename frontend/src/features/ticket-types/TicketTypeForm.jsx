@@ -23,7 +23,8 @@ export const TicketTypeForm = ({
     race: '',
     price: '',
     duration: '1',
-    category: ''
+    category: '',
+    estado: 'Disponible'
   });
   const [errors, setErrors] = useState({});
 
@@ -35,7 +36,8 @@ export const TicketTypeForm = ({
           race: getId(initialData.race),
           price: String(initialData.basePrice ?? initialData.price ?? ''),
           duration: String(initialData.duration ?? 1),
-          category: getId(initialData.category)
+          category: getId(initialData.category),
+          estado: initialData.estado || 'Disponible'
         }
       : {
           sku: '',
@@ -43,7 +45,8 @@ export const TicketTypeForm = ({
           race: '',
           price: '',
           duration: '1',
-          category: ''
+          category: '',
+          estado: 'Disponible'
         });
     setErrors({});
   }, [initialData]);
@@ -225,6 +228,22 @@ export const TicketTypeForm = ({
         ))}
       </select>
       {fieldError('category')}
+
+      <label htmlFor="ticket-type-estado">Estado</label>
+      <select
+        id="ticket-type-estado"
+        name="estado"
+        value={formData.estado}
+        onChange={handleChange}
+        {...fieldProps('estado')}
+      >
+        <option value="Vendida">Vendida</option>
+        <option value="Disponible">Disponible</option>
+        <option value="Reservada">Reservada</option>
+        <option value="Cancelada">Cancelada</option>
+        <option value="Reembolsada">Reembolsada</option>
+      </select>
+      {fieldError('estado')}
       {variantesDisponibles.length === 0 ? (
         <p className="piloto-field-hint">
           No hay variantes con categorías de entrada y grada y porcentaje configurado. Completa una variante antes de crear entradas.

@@ -30,7 +30,9 @@ La migración completa los datos heredados de las entidades existentes y garanti
 
 ## Tipos de entrada
 
-El endpoint `/api/ticket-types` permite consultar, crear, actualizar y eliminar lógicamente tipos de entrada. Cada tipo requiere un SKU único generado automáticamente, referencias a un circuito, una carrera y una variante válida, un precio base diario no negativo (el campo `price` en las solicitudes) y una duración entera de 1 a 3 días. La propiedad `category` referencia una variante que debe tener categorías de entrada y grada. El precio devuelto (`price`) se calcula como precio base diario × duración + precio de la variante; `basePrice` conserva el precio diario para ediciones. Las relaciones se devuelven pobladas y se envían como IDs de MongoDB al crear o actualizar.
+El endpoint `/api/ticket-types` permite consultar, crear, actualizar y eliminar lógicamente tipos de entrada. Cada tipo requiere un SKU único generado automáticamente, referencias a un circuito, una carrera y una variante válida, un precio base diario no negativo (el campo `price` en las solicitudes) y una duración entera de 1 a 3 días. Su campo `estado` admite `Vendida`, `Disponible`, `Reservada`, `Cancelada` o `Reembolsada` y por defecto es `Disponible`. La propiedad `category` referencia una variante que debe tener categorías de entrada y grada. El precio devuelto (`price`) se calcula como precio base diario × duración + precio de la variante; `basePrice` conserva el precio diario para ediciones. Las relaciones se devuelven pobladas y se envían como IDs de MongoDB al crear o actualizar.
+
+Las carreras (`/api/carreras`) admiten los estados `En vigor`, `Cancelada`, `Aplazada` y `Finalizada`; el valor predeterminado es `En vigor`.
 
 Las variantes (`/api/variants`) generan el SKU a partir de sus categorías y requieren precio no negativo, porcentaje y referencias a categorías `categoriaEntrada` y `categoriaGrada` existentes. Los tipos de entrada usan `category` para referenciar una variante. El formulario de categorías de circuitos permite administrar ambas clases.
 

@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
 const Image = require('./image.model');
 
+const estadosCarrera = ['En vigor', 'Cancelada', 'Aplazada', 'Finalizada'];
+
 const carreraSchema = new mongoose.Schema(
   {
     slug: {
@@ -32,6 +34,12 @@ const carreraSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Circuito',
       required: [true, 'El circuito de la carrera es obligatorio'],
+    },
+    estado: {
+      type: String,
+      enum: estadosCarrera,
+      default: 'En vigor',
+      required: [true, 'El estado de la carrera es obligatorio'],
     },
     isActive: {
       type: Boolean,

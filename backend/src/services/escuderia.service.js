@@ -1,6 +1,6 @@
 const escuderiaRepository = require('../repositories/escuderia.repository');
 const pilotoRepository = require('../repositories/piloto.repository');
-const CategoriaGlobal = require('../models/categoria-global.model');
+const categoriaGlobalRepository = require('../repositories/categoria-global.repository');
 const AppError = require('../utils/appError');
 const mongoose = require('mongoose');
 const { createUniqueSlug } = require('../utils/slug');
@@ -30,7 +30,7 @@ class EscuderiaService {
   }
 
   async crearEscuderia(data) {
-    if (!(await CategoriaGlobal.findById(data.categoria))) {
+    if (!(await categoriaGlobalRepository.findById(data.categoria))) {
       throw new AppError('La categoría proporcionada no existe', 400);
     }
 
@@ -52,7 +52,7 @@ class EscuderiaService {
   }
 
   async actualizarEscuderia(id, data) {
-    if (data.categoria && !(await CategoriaGlobal.findById(data.categoria))) {
+    if (data.categoria && !(await categoriaGlobalRepository.findById(data.categoria))) {
       throw new AppError('La categoría proporcionada no existe', 400);
     }
 
@@ -83,7 +83,7 @@ class EscuderiaService {
   }
 
   async eliminarEscuderia(id) {
-    const pilotosAsociados = await pilotoRepository.findByEscuderia(id);
+    const pilotosAsociados = await pilotoRepository.findByEscuderia(id, true);
     if (pilotosAsociados.length > 0) {
       throw new AppError('No se puede eliminar la escudería porque tiene pilotos asociados', 400);
     }

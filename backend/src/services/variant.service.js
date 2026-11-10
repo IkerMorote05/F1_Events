@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const variantRepository = require('../repositories/variant.repository');
-const imageRepository = require('../repositories/image.repository');
 const categoriaCircuitosRepository = require('../repositories/categoria-circuitos.repository');
 const AppError = require('../utils/appError');
 const slugify = require('../utils/slug');
@@ -141,8 +140,6 @@ class VariantService {
     if (await variantRepository.isReferencedByTicketType(variant._id)) {
       throw new AppError('No se puede eliminar la variante porque hay tipos de entrada asociados', 400);
     }
-    const images = await imageRepository.findByEntity('Variant', variant._id);
-    if (images.length) throw new AppError('No se puede eliminar la variante porque tiene imágenes asociadas', 400);
     return variantRepository.softDelete(variant._id);
   }
 }

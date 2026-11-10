@@ -9,7 +9,8 @@ export const carreraSchema = z.object({
     .regex(/^\d+$/, 'La capacidad debe ser un número entero')
     .transform(Number)
     .pipe(z.number().int().min(0, 'La capacidad no puede ser negativa')),
-  circuito: z.string().min(1, 'Selecciona un circuito')
+  circuito: z.string().min(1, 'Selecciona un circuito'),
+  estado: z.enum(['En vigor', 'Cancelada', 'Aplazada', 'Finalizada'])
 });
 
 export const carreraImageSchema = z.object({

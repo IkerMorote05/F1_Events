@@ -16,5 +16,6 @@ export const ticketTypeSchema = z.object({
     .trim()
     .regex(/^[1-3]$/, 'La duración debe ser de 1, 2 o 3 días')
     .transform(Number),
-  category: z.string().min(1, 'Selecciona una variante')
+  category: z.string().min(1, 'Selecciona una variante'),
+  estado: z.enum(['Vendida', 'Disponible', 'Reservada', 'Cancelada', 'Reembolsada'])
 });

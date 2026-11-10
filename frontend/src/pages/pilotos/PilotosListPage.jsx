@@ -84,12 +84,18 @@ export const PilotosListPage = () => {
           : piloto.nacionalidad || 'Sin asignar';
       }
     },
-    { key: 'escuderia', label: 'Escudería', render: (piloto) => piloto.escuderia?.nombre || 'Sin asignar' },
+    {
+      key: 'escuderia',
+      label: 'Escudería / Estado del piloto',
+      render: (piloto) => piloto.estado === 'compitiendo'
+        ? piloto.escuderia?.nombre || 'Sin asignar'
+        : piloto.estado || 'compitiendo'
+    },
     { key: 'edad', label: 'Edad', render: (piloto) => getAge(piloto.fecha_nacimiento) },
     { key: 'puntos', label: 'Puntos', render: (piloto) => `${piloto.puntos || 0} PTS` },
     {
       key: 'estado',
-      label: 'Estado',
+      label: 'Estado del registro',
       render: (piloto) => {
         const deleted = Boolean(piloto.deletedAt);
         const active = piloto.isActive !== false;

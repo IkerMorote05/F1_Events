@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('../utils/slug');
 const Image = require('./image.model');
 
+const estadosPiloto = ['compitiendo', 'agente libre', 'lesion', 'retirado', 'piloto reserva'];
+
 const pilotoSchema = new mongoose.Schema(
   {
     nombre: {
@@ -22,7 +24,15 @@ const pilotoSchema = new mongoose.Schema(
     escuderia: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Escuderia',
-      required: [true, 'La escudería es obligatoria'],
+      required() {
+        return ['compitiendo', 'lesion', 'piloto reserva'].includes(this.estado);
+      },
+    },
+    estado: {
+      type: String,
+      enum: estadosPiloto,
+      default: 'compitiendo',
+      required: [true, 'El estado del piloto es obligatorio'],
     },
     puntos: {
       type: Number,

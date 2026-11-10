@@ -13,6 +13,10 @@ class CategoriaGlobalRepository extends CrudRepository {
     return CategoriaGlobal.findOne({ competicion });
   }
 
+  findActiveByCompeticion(competicion) {
+    return CategoriaGlobal.findOne({ competicion, deletedAt: null });
+  }
+
   async isReferenced(id) {
     const [circuito, escuderia, piloto] = await Promise.all([
       Circuito.exists({ categoria: id }),

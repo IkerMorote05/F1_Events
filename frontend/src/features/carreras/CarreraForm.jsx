@@ -5,7 +5,8 @@ const emptyForm = {
   nombre: '',
   fecha: '',
   capacidad: '',
-  circuito: ''
+  circuito: '',
+  estado: 'En vigor'
 };
 
 export const CarreraForm = ({ initialData, circuitos, submitting, onSubmit, onCancel }) => {
@@ -19,7 +20,8 @@ export const CarreraForm = ({ initialData, circuitos, submitting, onSubmit, onCa
           nombre: initialData.nombre || '',
           fecha: initialData.fecha ? new Date(initialData.fecha).toISOString().slice(0, 10) : '',
           capacidad: String(initialData.capacidad ?? ''),
-          circuito: initialData.circuito?._id || initialData.circuito || ''
+          circuito: initialData.circuito?._id || initialData.circuito || '',
+          estado: initialData.estado || 'En vigor'
         }
       : { ...emptyForm, circuito: circuitos[0]?._id || '' });
     setImages(Array.isArray(initialData?.images)
@@ -131,6 +133,16 @@ export const CarreraForm = ({ initialData, circuitos, submitting, onSubmit, onCa
         ))}
       </select>
       {fieldError('circuito')}
+
+      <label htmlFor="carrera-estado">Estado</label>
+      <select id="carrera-estado" name="estado" value={formData.estado} onChange={handleChange}
+        {...fieldProps('estado')}>
+        <option value="En vigor">En vigor</option>
+        <option value="Cancelada">Cancelada</option>
+        <option value="Aplazada">Aplazada</option>
+        <option value="Finalizada">Finalizada</option>
+      </select>
+      {fieldError('estado')}
 
       {circuitos.length === 0 ? <p className="piloto-field-error">Registra un circuito antes de crear una carrera.</p> : null}
 

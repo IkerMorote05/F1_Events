@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const carreraRepository = require('../repositories/carrera.repository');
 const circuitoRepository = require('../repositories/circuito.repository');
+const ticketTypeRepository = require('../repositories/ticket-type.repository');
 const AppError = require('../utils/appError');
 const { createUniqueSlug } = require('../utils/slug');
 
@@ -25,6 +26,7 @@ class CarreraService {
       'fecha',
       'capacidad',
       'circuito',
+      'estado',
       'isActive',
       'status',
     ]);
@@ -84,6 +86,13 @@ class CarreraService {
     }
 
     if (
+      carreraData.estado !== undefined &&
+      !['En vigor', 'Cancelada', 'Aplazada', 'Finalizada'].includes(carreraData.estado)
+    ) {
+      throw new AppError('El estado de la carrera no es válido', 400);
+    }
+
+    if (
       carreraData.status !== undefined &&
       (typeof carreraData.status !== 'string' || !carreraData.status.trim())
     ) {
@@ -129,6 +138,7 @@ class CarreraService {
 
   async crearCarrera(payload) {
     const carreraData = this.validarPayload(payload);
+    carreraData.estado = carreraData.estado || 'En vigor';
     await this.validarCircuito(carreraData.circuito);
     carreraData.slug = await createUniqueSlug(
       carreraData.nombre,
@@ -166,6 +176,9 @@ class CarreraService {
 
   async eliminarCarrera(id) {
     this.validarId(id);
+    if (await ticketTypeRepository.isReferencedByRace(id)) {
+      throw new AppError('No se puede eliminar la carrera porque tiene tipos de entrada asociados', 400);
+    }
     const carrera = await carreraRepository.softDelete(id);
     if (!carrera) {
       throw new AppError('Carrera no encontrada', 404);
@@ -174,7 +187,11 @@ class CarreraService {
   }
 
   async softDeletePorSlug(slug) {
-    const carrera = await carreraRepository.softDeleteBySlug(slug);
+    const carreraActual = await carreraRepository.findBySlug(slug);
+    if (!carreraActual) {
+      throw new AppError('Carrera no encontrada', 404);
+    }
+    const carrera = await this.eliminarCarrera(carreraActual._id.toString());
     if (!carrera) {
       throw new AppError('Carrera no encontrada', 404);
     }

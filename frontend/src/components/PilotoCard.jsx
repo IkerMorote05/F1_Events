@@ -18,7 +18,12 @@ export const PilotoCard = ({ piloto, onEdit, onDelete }) => {
         <span className="f1-number">#{piloto.numero}</span>
       </div>
       <div className="f1-card-body " >
-        <p><strong>Escudería:</strong> {piloto.escuderia?.nombre || 'Sin asignar'}</p>
+        <p>
+          <strong>{piloto.estado === 'compitiendo' ? 'Escudería:' : 'Estado:'}</strong>{' '}
+          {piloto.estado === 'compitiendo'
+            ? piloto.escuderia?.nombre || 'Sin asignar'
+            : piloto.estado || 'compitiendo'}
+        </p>
         <p><strong>Edad: </strong> {piloto.fecha_nacimiento ? Math.floor((new Date() - new Date(piloto.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) : 'Desconocida'}</p>
         <p>
           <strong>Nacionalidad:</strong>{' '}

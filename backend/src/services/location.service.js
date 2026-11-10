@@ -1,5 +1,4 @@
 const locationRepository = require('../repositories/location.repository');
-const imageRepository = require('../repositories/image.repository');
 const AppError = require('../utils/appError');
 const { findByIdentifier, uniqueSlug } = require('./crud.helpers');
 
@@ -40,8 +39,9 @@ class LocationService {
   async eliminarLocation(id) {
     const location = await locationRepository.findById(id);
     if (!location) throw new AppError('Ubicación no encontrada', 404);
-    const images = await imageRepository.findByEntity('Location', location._id);
-    if (images.length) throw new AppError('No se puede eliminar la ubicación porque tiene imágenes asociadas', 400);
+    if (await locationRepository.isReferencedByCircuit(location._id)) {
+      throw new AppError('No se puede eliminar la ubicación porque tiene circuitos asociados', 400);
+    }
     return locationRepository.softDelete(location._id);
   }
 }

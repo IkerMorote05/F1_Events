@@ -16,9 +16,18 @@ export const pilotoSchema = z.object({
   puntos: requiredInteger('Los puntos', 0),
   victorias: requiredInteger('Las victorias', 0),
   podios: requiredInteger('Los podios', 0),
-  escuderia: z.string().min(1, 'Selecciona una escudería'),
+  escuderia: z.string(),
+  estado: z.enum(['compitiendo', 'agente libre', 'lesion', 'retirado', 'piloto reserva']),
   categoria: z.string().min(1, 'Selecciona una categoría'),
   fecha_nacimiento: z.string().optional()
+}).superRefine(({ estado, escuderia }, context) => {
+  if (['compitiendo', 'lesion', 'piloto reserva'].includes(estado) && !escuderia) {
+    context.addIssue({
+      code: 'custom',
+      path: ['escuderia'],
+      message: `Selecciona una escudería para un piloto ${estado}`
+    });
+  }
 });
 
 export const pilotoImageSchema = z.object({

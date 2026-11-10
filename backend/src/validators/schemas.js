@@ -23,7 +23,8 @@ const pilotoCreate = z
     nombre: z.string().min(1),
     numero: numericValue,
     nacionalidad: z.string().min(1),
-    escuderia: z.string().min(1),
+    escuderia: z.union([z.string().min(1), z.literal(''), z.null()]).optional(),
+    estado: z.enum(['compitiendo', 'agente libre', 'lesion', 'retirado', 'piloto reserva']).optional(),
     categoria: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de categoría válido'),
     puntos: numericValue.optional(),
     victorias: numericValue.optional(),
@@ -122,6 +123,7 @@ const carreraCreate = z
     fecha: dateValue,
     capacidad: nonNegativeIntegerValue,
     circuito: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de circuito válido'),
+    estado: z.enum(['En vigor', 'Cancelada', 'Aplazada', 'Finalizada']).optional(),
     isActive: z.boolean().optional(),
     status: z.string().optional(),
   })
@@ -139,6 +141,7 @@ const ticketTypeCreate = z.object({
     'La duración debe ser un número entero de 1 a 3 días'
   ),
   category: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de variante válido'),
+  estado: z.enum(['Vendida', 'Disponible', 'Reservada', 'Cancelada', 'Reembolsada']).optional(),
   isActive: z.boolean().optional(),
   status: z.string().optional(),
 });

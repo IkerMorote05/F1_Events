@@ -10,6 +10,7 @@ const emptyForm = {
   victorias: '0',
   podios: '0',
   escuderia: '',
+  estado: 'compitiendo',
   categoria: '',
   fecha_nacimiento: ''
 };
@@ -33,6 +34,7 @@ export const PilotoForm = ({ initialData, escuderias, categorias, submitting, on
           victorias: String(initialData.victorias ?? 0),
           podios: String(initialData.podios ?? 0),
           escuderia: getReferenceId(initialData.escuderia),
+          estado: initialData.estado || 'compitiendo',
           categoria: getReferenceId(initialData.categoria),
           fecha_nacimiento: toDateInput(initialData.fecha_nacimiento)
         }
@@ -174,16 +176,28 @@ export const PilotoForm = ({ initialData, escuderias, categorias, submitting, on
         aria-describedby={errors.podios ? 'podios-error' : undefined} />
       {renderFieldError('podios')}
 
-      <label htmlFor="escuderia">Escudería</label>
+      <label htmlFor="escuderia">Escudería{['compitiendo', 'lesion', 'piloto reserva'].includes(formData.estado) ? ' *' : ''}</label>
       <select id="escuderia" name="escuderia" value={formData.escuderia} onChange={handleChange}
         aria-invalid={Boolean(errors.escuderia)}
         aria-describedby={errors.escuderia ? 'escuderia-error' : undefined}>
-        <option value="">-- Selecciona una escudería --</option>
+        <option value="">-- Sin escudería --</option>
         {escuderias.map((escuderia) => (
           <option key={escuderia._id} value={escuderia._id}>{escuderia.nombre}</option>
         ))}
       </select>
       {renderFieldError('escuderia')}
+
+      <label htmlFor="estado">Estado del piloto</label>
+      <select id="estado" name="estado" value={formData.estado} onChange={handleChange}
+        aria-invalid={Boolean(errors.estado)}
+        aria-describedby={errors.estado ? 'estado-error' : undefined}>
+        <option value="compitiendo">Compitiendo</option>
+        <option value="agente libre">Agente libre</option>
+        <option value="lesion">Lesión</option>
+        <option value="retirado">Retirado</option>
+        <option value="piloto reserva">Piloto reserva</option>
+      </select>
+      {renderFieldError('estado')}
 
       <label htmlFor="categoria">Categoría</label>
       <select id="categoria" name="categoria" value={formData.categoria} onChange={handleChange}

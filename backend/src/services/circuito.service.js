@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const circuitoRepository = require('../repositories/circuito.repository');
 const carreraRepository = require('../repositories/carrera.repository');
 const locationRepository = require('../repositories/location.repository');
-const CategoriaCircuitos = require('../models/categoria-circuitos.model');
-const CategoriaGlobal = require('../models/categoria-global.model');
+const categoriaCircuitosRepository = require('../repositories/categoria-circuitos.repository');
+const categoriaGlobalRepository = require('../repositories/categoria-global.repository');
 const AppError = require('../utils/appError');
 const slugify = require('../utils/slug');
 const { createUniqueSlug } = slugify;
@@ -23,14 +23,15 @@ class CircuitoService {
     const normalizedValue = value.trim();
     let category;
     if (mongoose.Types.ObjectId.isValid(normalizedValue)) {
-      category = await CategoriaCircuitos.findById(normalizedValue);
+      category = await categoriaCircuitosRepository.findById(normalizedValue);
       if (!category || typeof category[field] !== 'string' || !category[field].trim()) {
         throw new AppError(`La categoría de ${field} proporcionada no existe`, 400);
       }
     } else {
-      category = await CategoriaCircuitos.findOne({ [field]: normalizedValue });
+      const method = field === 'tipo' ? 'findByTipo' : 'findByDesgaste';
+      category = await categoriaCircuitosRepository[method](normalizedValue);
       if (!category) {
-        category = await CategoriaCircuitos.create({
+        category = await categoriaCircuitosRepository.create({
           [field]: normalizedValue,
           slug: `${field}-${slugify(normalizedValue) || 'categoria'}`,
         });
@@ -60,8 +61,8 @@ class CircuitoService {
 
     const normalizedValue = value.trim();
     const category = mongoose.Types.ObjectId.isValid(normalizedValue)
-      ? await CategoriaGlobal.findById(normalizedValue)
-      : await CategoriaGlobal.findOne({ competicion: normalizedValue });
+      ? await categoriaGlobalRepository.findById(normalizedValue)
+      : await categoriaGlobalRepository.findActiveByCompeticion(normalizedValue);
     if (!category) {
       throw new AppError('La categoría proporcionada no existe', 400);
     }
@@ -192,6 +193,21 @@ class CircuitoService {
   }
 
   async restaurarEliminacion(slug) {
+    const deletedCircuit = await circuitoRepository.findBySlug(slug, true);
+    if (!deletedCircuit || !deletedCircuit.deletedAt) {
+      throw new AppError('Circuito eliminado no encontrado', 404);
+    }
+    if (!deletedCircuit.categoria || !deletedCircuit.location) {
+      throw new AppError('No se puede restaurar el circuito porque faltan referencias obligatorias', 400);
+    }
+    await this.resolveGlobalCategory(
+      (deletedCircuit.categoria._id || deletedCircuit.categoria).toString(),
+      true
+    );
+    await this.validateRelations({
+      location: (deletedCircuit.location._id || deletedCircuit.location).toString(),
+    }, true);
+
     const circuito = await circuitoRepository.restoreBySlug(slug);
     if (!circuito) {
       throw new AppError('Circuito eliminado no encontrado', 404);

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const estadosTicket = ['Vendida', 'Disponible', 'Reservada', 'Cancelada', 'Reembolsada'];
+
 const ticketTypeSchema = new mongoose.Schema(
   {
     sku: {
@@ -49,6 +51,12 @@ const ticketTypeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Variant',
       required: [true, 'La variante es obligatoria'],
+    },
+    estado: {
+      type: String,
+      enum: estadosTicket,
+      default: 'Disponible',
+      required: [true, 'El estado del ticket es obligatorio'],
     },
     isActive: {
       type: Boolean,

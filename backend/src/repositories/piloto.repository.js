@@ -84,8 +84,16 @@ class PilotoRepository {
       .sort({ puntos: -1, victorias: -1 }));
   }
 
-  async findByEscuderia(id) {
-    return populatePiloto(Piloto.find({ escuderia: id, deletedAt: null }));
+  async findByEscuderia(id, includeDeleted = false) {
+    const filter = { escuderia: id };
+    if (!includeDeleted) filter.deletedAt = null;
+    return populatePiloto(Piloto.find(filter));
+  }
+
+  countCompitiendoByEscuderia(id, excludeId = null) {
+    const filter = { escuderia: id, estado: 'compitiendo', deletedAt: null };
+    if (excludeId) filter._id = { $ne: excludeId };
+    return Piloto.countDocuments(filter);
   }
 }
 

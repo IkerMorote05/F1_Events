@@ -27,6 +27,10 @@ class TicketTypeRepository extends CrudRepository {
     return this.populate(TicketType.findOne(filter));
   }
 
+  isReferencedByRace(id) {
+    return TicketType.exists({ race: id });
+  }
+
   async findByIdentifier(identifier) {
     const bySku = await this.findBySku(identifier);
     if (bySku) return bySku;
