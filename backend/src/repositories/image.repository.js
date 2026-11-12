@@ -13,10 +13,8 @@ class ImageRepository extends CrudRepository {
   }
 
   async findByUsuarioAvatar(imageId, includeDeleted = false) {
-    const Usuario = require('../models/usuarios.model');
-    const filter = { avatar: imageId };
-    if (!includeDeleted) filter.deletedAt = null;
-    return Usuario.find(filter);
+    const Profile = require('../models/profile.model');
+    return Profile.find({ avatar: imageId });
   }
 }
 

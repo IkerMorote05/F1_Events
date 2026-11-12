@@ -3,7 +3,7 @@ const CrudRepository = require('./crud.repository');
 
 class UsuarioRepository extends CrudRepository {
   constructor() {
-    super(Usuario, ['roles', 'avatar', 'images']);
+    super(Usuario, ['roles', 'profile', 'profile.avatar', 'images']);
   }
 
   async findByRole(roleId, includeDeleted = false) {

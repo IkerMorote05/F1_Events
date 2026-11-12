@@ -26,7 +26,13 @@ npm run dev
    npm run dev
    ```
 
-La migración completa los datos heredados de las entidades existentes y garantiza el índice único del SKU de tipos de entrada. Es idempotente y puede ejecutarse de nuevo.
+La migración completa los datos heredados de las entidades existentes, crea perfiles para los usuarios existentes y el rol estándar `Usuario` si falta, protege las contraseñas con Argon2 y garantiza el índice único del SKU de tipos de entrada. Es idempotente y puede ejecutarse de nuevo.
+
+## Autenticación
+
+Configura `JWT_SECRET` con una clave aleatoria de al menos 32 caracteres y, opcionalmente, `JWT_EXPIRES_IN` (por defecto `1h`). `POST /api/auth/register` crea una cuenta con el rol estándar `Usuario`; `POST /api/auth/login` devuelve un JWT con el rol vigente. Envía el token como `Authorization: Bearer <token>`. Las consultas de lectura siguen siendo públicas; las escrituras de administración requieren el rol `Admin`. El perfil propio se consulta y actualiza en `GET` y `PATCH /api/profile/me`.
+
+Las bases de datos existentes deben ejecutar `npm run migrate` para mover nombre, apellidos y avatar a `Profile` y convertir las contraseñas existentes a Argon2. Los datos de prueba incluyen las cuentas/roles `Admin` y `Usuario`; el usuario de prueba conserva la contraseña `123456789`.
 
 ## Tipos de entrada
 

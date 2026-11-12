@@ -8,11 +8,13 @@ const Image = require('./models/image.model');
 const Variant = require('./models/variant.model');
 const TicketType = require('./models/ticket-type.model');
 const Usuario = require('./models/usuarios.model');
+const Profile = require('./models/profile.model');
 const Rol = require('./models/roles.model');
 const CategoriaGlobal = require('./models/categoria-global.model');
 const Circuito = require('./models/circuito.model');
 const CategoriaCircuitos = require('./models/categoria-circuitos.model');
 const slugify = require('./utils/slug');
+const { hashPassword } = require('./utils/password');
 
 const legacyCircuitLocations = new Map([
   ['espana', { pais: 'España', ciudad: 'Barcelona', capital: 'Madrid' }],
@@ -240,6 +242,70 @@ const migrateCircuitCategoryReferences = async () => {
   return circuitos.length;
 };
 
+const migrateUserProfilesAndPasswords = async () => {
+  const users = await Usuario.collection.find({}).toArray();
+  let profiles = 0;
+  let passwords = 0;
+
+  for (const user of users) {
+    const set = {};
+    const unset = {};
+
+    let profile = await Profile.findOne({ user: user._id });
+    if (!profile && user.profile) {
+      profile = await Profile.findById(user.profile);
+      if (profile && !profile.user) {
+        await Profile.collection.updateOne(
+          { _id: profile._id },
+          { $set: { user: user._id } }
+        );
+      }
+    }
+
+    if (!profile) {
+      profile = await Profile.create({
+        user: user._id,
+        nombre: typeof user.nombre === 'string' && user.nombre.trim() ? user.nombre.trim() : 'Usuario',
+        apellidos: typeof user.apellidos === 'string' && user.apellidos.trim()
+          ? user.apellidos.trim()
+          : 'Sin apellidos',
+        avatar: user.avatar || null,
+      });
+      profiles += 1;
+    }
+
+    for (const field of ['profile', 'nombre', 'apellidos', 'avatar']) {
+      if (Object.prototype.hasOwnProperty.call(user, field)) unset[field] = '';
+    }
+
+    if (typeof user.password === 'string' && !user.password.startsWith('$argon2')) {
+      set.password = await hashPassword(user.password);
+      passwords += 1;
+    }
+
+    if (Object.keys(set).length || Object.keys(unset).length) {
+      await Usuario.collection.updateOne(
+        { _id: user._id },
+        {
+          ...(Object.keys(set).length ? { $set: set } : {}),
+          ...(Object.keys(unset).length ? { $unset: unset } : {}),
+        }
+      );
+    }
+  }
+
+  return { profiles, passwords };
+};
+
+const ensureDefaultUserRole = async () => {
+  const role = await Rol.findOne({ nombre: 'Usuario' });
+  if (role) return;
+  await Rol.create({
+    nombre: 'Usuario',
+    description: 'Cuenta de usuario estándar',
+  });
+};
+
 const migrateExistingData = async () => {
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI no está configurada');
@@ -286,11 +352,13 @@ const migrateExistingData = async () => {
     (document) => `${document.nombre}-${document.apellidos}`,
     true
   );
+  const { profiles, passwords } = await migrateUserProfilesAndPasswords();
   const roles = await migrateCollection(Rol, 'rol', (document) => document.nombre, true);
+  await ensureDefaultUserRole();
   const circuitos = await migrateCircuitLocations();
 
   console.log(
-    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, índice único de SKU de tipos de entrada verificado, ${usuarios} usuarios y ${roles} roles revisados.`
+    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, índice único de SKU de tipos de entrada verificado, ${usuarios} usuarios y ${roles} roles revisados; ${profiles} perfiles creados y ${passwords} contraseñas protegidas con Argon2.`
   );
 };
 

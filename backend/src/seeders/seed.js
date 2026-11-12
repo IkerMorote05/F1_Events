@@ -5,6 +5,7 @@ const Escuderia = require('../models/escuderia.model');
 const Piloto = require('../models/piloto.model');
 const Circuito = require('../models/circuito.model');
 const Usuario = require('../models/usuarios.model');
+const Profile = require('../models/profile.model');
 const Rol = require('../models/roles.model');
 const Image = require('../models/image.model');
 const Location = require('../models/location.model');
@@ -12,9 +13,11 @@ const Variant = require('../models/variant.model');
 const CategoriaGlobal = require('../models/categoria-global.model');
 const CategoriaCircuitos = require('../models/categoria-circuitos.model');
 const slugify = require('../utils/slug');
+const { hashPassword } = require('../utils/password');
 
 const rolesData=[
-  {nombre:"Admin", description:"Administra los archivos"}
+  {nombre:"Admin", description:"Administra los recursos de la API"},
+  {nombre:"Usuario", description:"Cuenta de usuario estándar"},
 ]
 
 const escuderiasData = [
@@ -42,6 +45,7 @@ const seedDB = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Conectado a la base de datos para sembrado...');
     await Usuario.deleteMany({});
+    await Profile.deleteMany({});
     await Rol.deleteMany({});
     await Image.deleteMany({});
     await Location.deleteMany({});
@@ -104,10 +108,17 @@ const seedDB = async () => {
     ];
     const roles = await Rol.insertMany(rolesData);
     const admin = roles.find((e) => e.nombre ==="Admin");
-    const usuariosData=[
-      {nombre:"admin", apellidos:"", email:"admin@gmail.com", password:"123456789", roles:admin._id}
-    ];
-    await Usuario.insertMany(usuariosData);
+    const adminUser = await Usuario.create({
+      slug: 'admin-f1',
+      email: 'admin@gmail.com',
+      password: await hashPassword('123456789'),
+      roles: admin._id,
+    });
+    await Profile.create({
+      user: adminUser._id,
+      nombre: 'admin',
+      apellidos: 'F1',
+    });
     const pilotosCreados = await Piloto.insertMany(
       pilotosData.map(({ categoria, ...piloto }) => ({
         ...piloto,

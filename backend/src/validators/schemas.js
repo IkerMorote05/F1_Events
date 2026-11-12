@@ -241,6 +241,30 @@ const usuarioCreate = z
 
 const usuarioUpdate = usuarioCreate.partial();
 
+const authRegister = z.object({
+  nombre: z.string().trim().min(1),
+  apellidos: z.string().trim().min(1),
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+});
+
+const authLogin = z.object({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+});
+
+const profileUpdate = z
+  .object({
+    nombre: z.string().trim().min(1).optional(),
+    apellidos: z.string().trim().min(1).optional(),
+    avatar: z.union([
+      z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de imagen válido'),
+      z.null(),
+    ]).optional(),
+    settings: z.record(z.string(), z.unknown()).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, 'El perfil debe incluir al menos un dato');
+
 const rolCreate = z
   .object({
     nombre: z.string().trim().min(1),
@@ -282,6 +306,9 @@ module.exports = {
   variantUpdate,
   usuarioCreate,
   usuarioUpdate,
+  authRegister,
+  authLogin,
+  profileUpdate,
   rolCreate,
   rolUpdate,
   isActiveBody,
