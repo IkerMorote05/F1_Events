@@ -105,7 +105,7 @@ const seedDB = async () => {
     const roles = await Rol.insertMany(rolesData);
     const admin = roles.find((e) => e.nombre ==="Admin");
     const usuariosData=[
-      {nombre:"Pepito", apellidos:"Perez", email:"prueba@gmail.com", password:"123456789", roles:admin._id}
+      {nombre:"admin", apellidos:"", email:"admin@gmail.com", password:"123456789", roles:admin._id}
     ];
     await Usuario.insertMany(usuariosData);
     const pilotosCreados = await Piloto.insertMany(
