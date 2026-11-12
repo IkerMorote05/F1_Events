@@ -21,7 +21,8 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
-
+router.use('/clasificacion', clasificacionRoutes);
+router.use('/usuarios', usuarioRoutes);
 const writeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 router.use((req, res, next) => {
   if (!writeMethods.has(req.method)) return next();
@@ -32,7 +33,6 @@ router.use((req, res, next) => {
 });
 
 router.use('/pilotos', pilotoRoutes);
-router.use('/clasificacion', clasificacionRoutes);
 router.use('/escuderias', escuderiaRoutes);
 router.use('/circuitos', circuitoRoutes);
 router.use('/carreras', carreraRoutes);
@@ -40,7 +40,6 @@ router.use('/ticket-types', ticketTypeRoutes);
 router.use('/images', imageRoutes);
 router.use('/locations', locationRoutes);
 router.use('/variants', variantRoutes);
-router.use('/usuarios', usuarioRoutes);
 router.use('/roles', rolRoutes);
 router.use('/categorias-globales', categoriaGlobalRoutes);
 router.use('/categorias-circuitos', categoriaCircuitosRoutes);

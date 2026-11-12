@@ -53,11 +53,27 @@ select:focus-visible {
   top: 1rem;
   z-index: 10;
   min-height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   background: rgba(31, 31, 39, 0.94);
   border: 1px solid var(--f1-gray);
   border-left: 3px solid var(--f1-red);
   border-radius: 12px;
   backdrop-filter: blur(12px);
+  scrollbar-color: var(--f1-gray) transparent;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+}
+
+.f1-navbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.f1-navbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--f1-gray);
+  background-clip: padding-box;
 }
 
 .f1-navbar-inner {
@@ -103,6 +119,108 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.f1-nav-group {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.f1-nav-group-trigger {
+  list-style: none;
+  cursor: pointer;
+}
+
+.f1-nav-group-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.f1-nav-chevron {
+  flex: 0 0 auto;
+  margin-left: auto;
+  transition: transform 160ms ease;
+}
+
+.f1-nav-group[open] .f1-nav-chevron {
+  transform: rotate(180deg);
+}
+
+.f1-nav-sub-links {
+  display: grid;
+  gap: 0.2rem;
+  margin-left: 0.9rem;
+  padding-left: 0.45rem;
+  border-left: 1px solid var(--f1-border);
+}
+
+.f1-nav-sub-links .f1-nav-link {
+  min-height: 38px;
+  padding-left: 0.55rem;
+  font-size: 0.85rem;
+}
+
+.f1-nav-auth {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 0.25rem;
+  padding: 0.65rem;
+  border: 1px solid var(--f1-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.f1-nav-account {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.f1-nav-avatar {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.f1-nav-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--f1-red);
+  font-weight: 800;
+}
+
+.f1-nav-account-details {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.f1-nav-auth-error {
+  margin: 0;
+  color: #ff8b8b;
+  font-size: 0.82rem;
+}
+
+.f1-nav-user {
+  overflow: hidden;
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.f1-nav-auth-button {
+  width: 100%;
+  min-height: 34px;
+  justify-content: flex-start;
+  padding: 0 0.2rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 
 .f1-nav-link {
@@ -154,6 +272,54 @@ select:focus-visible {
   background: var(--f1-panel);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(14px);
+}
+
+.auth-page {
+  display: grid;
+  min-height: min(70vh, 700px);
+  align-items: center;
+}
+
+.auth-panel {
+  width: min(100%, 440px);
+  margin: 0 auto;
+}
+
+.auth-panel h1 {
+  margin: 0;
+}
+
+.auth-description {
+  margin: 0.5rem 0 1.5rem;
+  color: #b5b5bc;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: #dedee2;
+  font-weight: 700;
+}
+
+.auth-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.8rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--f1-border);
+  border-radius: 10px;
+  background: rgba(21, 21, 30, 0.72);
+  color: white;
+}
+
+.auth-error {
+  margin: 0;
+  color: #ff8b8b;
 }
 
 .page-container h1,
@@ -813,6 +979,8 @@ button:disabled {
 
   .f1-navbar {
     min-height: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   .f1-navbar-inner {
@@ -824,11 +992,46 @@ button:disabled {
     gap: 0.5rem 1rem;
   }
 
+  .f1-nav-auth {
+    margin: 0;
+    padding: 0.3rem;
+    border: 0;
+    background: transparent;
+  }
+
+  .f1-nav-account {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .f1-nav-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .f1-nav-auth-button {
+    width: auto;
+  }
+
   .f1-nav-links {
     width: 100%;
     flex-direction: row;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    overflow: visible;
     gap: 0.35rem;
+  }
+
+  .f1-nav-group {
+    flex: 0 0 auto;
+  }
+
+  .f1-nav-group-trigger {
+    width: 100%;
+  }
+
+  .f1-nav-sub-links {
+    padding-top: 0.25rem;
   }
 
   .f1-nav-link {

@@ -30,7 +30,7 @@ La migración completa los datos heredados de las entidades existentes, crea per
 
 ## Autenticación
 
-Configura `JWT_SECRET` con una clave aleatoria de al menos 32 caracteres y, opcionalmente, `JWT_EXPIRES_IN` (por defecto `1h`). `POST /api/auth/register` crea una cuenta con el rol estándar `Usuario`; `POST /api/auth/login` devuelve un JWT con el rol vigente. Envía el token como `Authorization: Bearer <token>`. Las consultas de lectura siguen siendo públicas; las escrituras de administración requieren el rol `Admin`. El perfil propio se consulta y actualiza en `GET` y `PATCH /api/profile/me`.
+Configura `JWT_SECRET` con una clave aleatoria de al menos 32 caracteres y, opcionalmente, `JWT_EXPIRES_IN` (por defecto `1h`). `POST /api/auth/register` crea una cuenta con el rol estándar `Usuario`; `POST /api/auth/login` devuelve un JWT con el rol vigente. Envía el token como `Authorization: Bearer <token>` y usa `POST /api/auth/logout` para revocar la sesión. Los JWT revocados se almacenan mediante su hash hasta su vencimiento y el middleware rechaza su uso posterior. Las consultas de lectura siguen siendo públicas; las escrituras de administración requieren el rol `Admin`. El perfil propio se consulta y actualiza en `GET` y `PATCH /api/profile/me`.
 
 Las bases de datos existentes deben ejecutar `npm run migrate` para mover nombre, apellidos y avatar a `Profile` y convertir las contraseñas existentes a Argon2. Los datos de prueba incluyen las cuentas/roles `Admin` y `Usuario`; el usuario de prueba conserva la contraseña `123456789`.
 

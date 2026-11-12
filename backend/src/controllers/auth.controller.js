@@ -18,6 +18,15 @@ class AuthController {
       next(error);
     }
   }
+
+  async cerrarSesion(req, res, next) {
+    try {
+      await authService.cerrarSesion(req.auth.token, req.auth.payload);
+      res.status(200).json({ status: 'success', message: 'Sesión cerrada' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

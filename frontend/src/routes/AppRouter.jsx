@@ -1,8 +1,10 @@
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { ClasificacionPage } from '../pages/clasificacion/ClasificacionPage';
 import { PilotoSkeleton } from '../components/PilotoSkeleton';
+import { useAuth } from '../context/AuthContext';
 
+const LoginPage = lazy(() => import('../pages/LoginPage'));
 const PilotosListPage = lazy(() => import('../pages/pilotos/PilotosListPage'));
 const PilotoCreatePage = lazy(() => import('../pages/pilotos/PilotoCreatePage'));
 const PilotoEditPage = lazy(() => import('../pages/pilotos/PilotoEditPage'));
@@ -49,44 +51,58 @@ const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPag
 const LocationCreatePage = lazy(() => import('../pages/locations/LocationCreatePage'));
 const LocationEditPage = lazy(() => import('../pages/locations/LocationEditPage'));
 
+const RequireAdmin = () => {
+  const { isAuthenticated, isAdmin } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (!isAdmin) return <Navigate to="/" replace />;
+  return <Outlet />;
+};
+
 export const AppRouter = () => {
   return (
     <Suspense fallback={<PilotoSkeleton />}>
       <Routes>
         <Route path="/" element={<ClasificacionPage />} />
-        <Route path="/pilotos" element={<PilotosListPage />} />
-        <Route path="/pilotos/nuevo" element={<PilotoCreatePage />} />
-        <Route path="/pilotos/:id/editar" element={<PilotoEditPage />} />
-        <Route path="/escuderias" element={<EscuderiasListPage />} />
-        <Route path="/escuderias/nueva" element={<EscuderiaCreatePage />} />
-        <Route path="/escuderias/:id/editar" element={<EscuderiaEditPage />} />
-        <Route path="/circuitos" element={<CircuitosListPage />} />
-        <Route path="/circuitos/nuevo" element={<CircuitoCreatePage />} />
-        <Route path="/circuitos/:id/editar" element={<CircuitoEditPage />} />
-        <Route path="/categorias-circuitos" element={<CategoriasCircuitosListPage />} />
-        <Route path="/categorias-circuitos/nueva" element={<CategoriaCircuitosCreatePage />} />
-        <Route path="/categorias-circuitos/:id/editar" element={<CategoriaCircuitosEditPage />} />
-        <Route path="/categorias-globales" element={<CategoriasGlobalesListPage />} />
-        <Route path="/categorias-globales/nueva" element={<CategoriaGlobalCreatePage />} />
-        <Route path="/categorias-globales/:id/editar" element={<CategoriaGlobalEditPage />} />
-        <Route path="/carreras" element={<CarrerasListPage />} />
-        <Route path="/carreras/nueva" element={<CarreraCreatePage />} />
-        <Route path="/carreras/:id/editar" element={<CarreraEditPage />} />
-        <Route path="/usuarios" element={<UsuariosListPage />} />
-        <Route path="/usuarios/nuevo" element={<UsuarioCreatePage />} />
-        <Route path="/usuarios/:id/editar" element={<UsuarioEditPage />} />
-        <Route path="/roles" element={<RolesListPage />} />
-        <Route path="/roles/nuevo" element={<RolCreatePage />} />
-        <Route path="/roles/:id/editar" element={<RolEditPage />} />
-        <Route path="/variants" element={<VariantsListPage />} />
-        <Route path="/variants/nueva" element={<VariantCreatePage />} />
-        <Route path="/variants/:id/editar" element={<VariantEditPage />} />
-        <Route path="/ticket-types" element={<TicketTypesListPage />} />
-        <Route path="/ticket-types/nuevo" element={<TicketTypeCreatePage />} />
-        <Route path="/ticket-types/:id/editar" element={<TicketTypeEditPage />} />
-        <Route path="/locations" element={<LocationsListPage />} />
-        <Route path="/locations/nueva" element={<LocationCreatePage />} />
-        <Route path="/locations/:id/editar" element={<LocationEditPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<RequireAdmin />}>
+          <Route path="/pilotos" element={<PilotosListPage />} />
+          <Route path="/pilotos/nuevo" element={<PilotoCreatePage />} />
+          <Route path="/pilotos/:id/editar" element={<PilotoEditPage />} />
+          <Route path="/escuderias" element={<EscuderiasListPage />} />
+          <Route path="/escuderias/nueva" element={<EscuderiaCreatePage />} />
+          <Route path="/escuderias/:id/editar" element={<EscuderiaEditPage />} />
+          <Route path="/circuitos" element={<CircuitosListPage />} />
+          <Route path="/circuitos/nuevo" element={<CircuitoCreatePage />} />
+          <Route path="/circuitos/:id/editar" element={<CircuitoEditPage />} />
+          <Route path="/categorias-circuitos" element={<CategoriasCircuitosListPage />} />
+          <Route path="/categorias-circuitos/nueva" element={<CategoriaCircuitosCreatePage />} />
+          <Route path="/categorias-circuitos/:id/editar" element={<CategoriaCircuitosEditPage />} />
+          <Route path="/categorias-globales" element={<CategoriasGlobalesListPage />} />
+          <Route path="/categorias-globales/nueva" element={<CategoriaGlobalCreatePage />} />
+          <Route path="/categorias-globales/:id/editar" element={<CategoriaGlobalEditPage />} />
+          <Route path="/carreras" element={<CarrerasListPage />} />
+          <Route path="/carreras/nueva" element={<CarreraCreatePage />} />
+          <Route path="/carreras/:id/editar" element={<CarreraEditPage />} />
+          <Route path="/usuarios" element={<UsuariosListPage />} />
+          <Route path="/usuarios/nuevo" element={<UsuarioCreatePage />} />
+          <Route path="/usuarios/:id/editar" element={<UsuarioEditPage />} />
+          <Route path="/roles" element={<RolesListPage />} />
+          <Route path="/roles/nuevo" element={<RolCreatePage />} />
+          <Route path="/roles/:id/editar" element={<RolEditPage />} />
+          <Route path="/variants" element={<VariantsListPage />} />
+          <Route path="/variants/nueva" element={<VariantCreatePage />} />
+          <Route path="/variants/:id/editar" element={<VariantEditPage />} />
+          <Route path="/ticket-types" element={<TicketTypesListPage />} />
+          <Route path="/ticket-types/nuevo" element={<TicketTypeCreatePage />} />
+          <Route path="/ticket-types/:id/editar" element={<TicketTypeEditPage />} />
+          <Route path="/locations" element={<LocationsListPage />} />
+          <Route path="/locations/nueva" element={<LocationCreatePage />} />
+          <Route path="/locations/:id/editar" element={<LocationEditPage />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

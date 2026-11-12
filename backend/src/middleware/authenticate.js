@@ -1,6 +1,7 @@
 const Usuario = require('../models/usuarios.model');
+const RevokedToken = require('../models/revoked-token.model');
 const AppError = require('../utils/appError');
-const { verifyToken } = require('../utils/jwt');
+const { verifyToken, hashToken } = require('../utils/jwt');
 
 const tokenErrors = new Set(['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError']);
 
@@ -23,6 +24,11 @@ const authenticate = async (req, res, next) => {
   }
 
   try {
+    const tokenHash = hashToken(match[1]);
+    if (await RevokedToken.exists({ tokenHash })) {
+      return next(new AppError('La sesión está cerrada', 401));
+    }
+
     const user = await Usuario.findOne({
       _id: payload.sub,
       isActive: true,
@@ -39,6 +45,7 @@ const authenticate = async (req, res, next) => {
       id: user._id.toString(),
       role: user.roles.nombre,
     };
+    req.auth = { token: match[1], payload };
     return next();
   } catch (error) {
     return next(error);

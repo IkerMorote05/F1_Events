@@ -96,6 +96,13 @@ La aplicación estará disponible por defecto en `http://localhost:5173`.
 
 ## 📌 Funcionalidades Principal
 
+### Inicio de sesión (`/login`)
+
+* Autenticación contra `/api/auth/login` con correo y contraseña.
+* La sesión se conserva en el navegador y el JWT se envía en las peticiones a la API.
+* El cierre de sesión revoca el JWT en el backend.
+* Las rutas de administración requieren una sesión con el rol `Admin`; al caducar el token, la sesión local se cierra.
+
 ### 🏆 Clasificación General (`/`)
 
 * Tabla dinámica del **Mundial de Pilotos** ordenada por puntos de mayor a menor.

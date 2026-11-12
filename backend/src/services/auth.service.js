@@ -1,9 +1,10 @@
 const Usuario = require('../models/usuarios.model');
 const Rol = require('../models/roles.model');
+const RevokedToken = require('../models/revoked-token.model');
 const AppError = require('../utils/appError');
 const usuarioService = require('./usuario.service');
 const { verifyPassword } = require('../utils/password');
-const { signToken } = require('../utils/jwt');
+const { signToken, hashToken } = require('../utils/jwt');
 
 const publicUser = (user) => ({
   _id: user._id,
@@ -55,6 +56,17 @@ class AuthService {
       token: signToken(user._id, role),
       user: publicUser(user),
     };
+  }
+
+  async cerrarSesion(token, payload) {
+    if (!Number.isFinite(payload.exp)) {
+      throw new AppError('El token no tiene una fecha de expiración válida', 401);
+    }
+
+    await RevokedToken.create({
+      tokenHash: hashToken(token),
+      expiresAt: new Date(payload.exp * 1000),
+    });
   }
 }
 
