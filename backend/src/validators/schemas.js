@@ -232,7 +232,10 @@ const usuarioCreate = z
     apellidos: z.string().trim().min(1),
     email: z.string().trim().email(),
     password: z.string().min(1),
-    avatar: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de imagen válido').optional(),
+    avatar: z.union([
+      z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de imagen válido'),
+      z.null(),
+    ]).optional(),
     roles: z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de rol válido'),
     isActive: z.boolean().optional(),
     status: z.string().optional(),
@@ -261,6 +264,13 @@ const profileUpdate = z
       z.string().refine(mongoose.Types.ObjectId.isValid, 'Debe ser un ID de imagen válido'),
       z.null(),
     ]).optional(),
+    avatarUrl: z.string().trim().url().refine((value) => {
+      try {
+        return ['http:', 'https:'].includes(new URL(value).protocol);
+      } catch {
+        return false;
+      }
+    }, 'La URL del avatar debe usar HTTP o HTTPS').optional(),
     settings: z.record(z.string(), z.unknown()).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, 'El perfil debe incluir al menos un dato');

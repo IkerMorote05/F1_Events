@@ -21,15 +21,28 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/profile', profileRoutes);
-router.use('/clasificacion', clasificacionRoutes);
 router.use('/usuarios', usuarioRoutes);
+router.use('/clasificacion', clasificacionRoutes);
+
+const protectedPaths = [
+  '/clasificacion',
+  '/pilotos',
+  '/escuderias',
+  '/circuitos',
+  '/carreras',
+  '/ticket-types',
+  '/images',
+  '/locations',
+  '/variants',
+  '/roles',
+  '/categorias-globales',
+  '/categorias-circuitos',
+];
 const writeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-router.use((req, res, next) => {
+router.use(protectedPaths, authenticate);
+router.use(protectedPaths, (req, res, next) => {
   if (!writeMethods.has(req.method)) return next();
-  return authenticate(req, res, (error) => {
-    if (error) return next(error);
-    return authorize('Admin')(req, res, next);
-  });
+  return authorize('Admin')(req, res, next);
 });
 
 router.use('/pilotos', pilotoRoutes);

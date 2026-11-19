@@ -52,13 +52,30 @@ class UsuarioService {
     delete data.deletedAt;
     data.slug = await uniqueSlug(usuarioRepository, usuarioSlugSource({ nombre, apellidos }), null, 'usuario');
     const user = await usuarioRepository.create(data);
-    await Profile.create({
-      user: user._id,
-      nombre,
-      apellidos,
-      avatar: avatar || null,
-    });
-    return serializeUsuario(await usuarioRepository.findById(user._id));
+    try {
+      await Profile.create({
+        user: user._id,
+        nombre,
+        apellidos,
+        avatar: avatar || null,
+      });
+    } catch (error) {
+      const cleanup = await usuarioRepository.Model.deleteOne({ _id: user._id });
+      if (cleanup.deletedCount !== 1) {
+        throw new AppError('No se pudo asociar el perfil ni eliminar la cuenta incompleta', 500);
+      }
+      throw error;
+    }
+    const createdUser = await usuarioRepository.findById(user._id);
+    if (!createdUser?.profile) {
+      await Profile.deleteOne({ user: user._id });
+      const cleanup = await usuarioRepository.Model.deleteOne({ _id: user._id });
+      if (cleanup.deletedCount !== 1) {
+        throw new AppError('No se pudo asociar el perfil ni eliminar la cuenta incompleta', 500);
+      }
+      throw new AppError('No se pudo asociar el perfil al usuario', 500);
+    }
+    return serializeUsuario(createdUser);
   }
 
   async actualizarUsuario(id, payload) {
@@ -74,31 +91,50 @@ class UsuarioService {
     }
     delete data.profile;
     if (data.password) data.password = await hashPassword(data.password);
-    const profileId = current.profile?._id || current.profile;
-    if (Object.keys(profileData).length) {
-      const profile = await Profile.findByIdAndUpdate(
-        profileId,
-        profileData,
-        { new: true, runValidators: true }
-      );
-      if (!profile) throw new AppError('Perfil de usuario no encontrado', 404);
-    }
     delete data.slug;
     delete data.deletedAt;
-    if (profileData.nombre || profileData.apellidos) {
+
+    const profileDefaults = { user: current._id };
+    for (const field of ['nombre', 'apellidos']) {
+      if (!Object.prototype.hasOwnProperty.call(profileData, field)) {
+        profileDefaults[field] = current[field] || current.profile?.[field];
+      }
+      if (!profileDefaults[field] && !profileData[field] && !current.profile) {
+        throw new AppError(`No se puede sincronizar el perfil sin ${field}`, 400);
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(profileData, 'nombre')
+      || Object.prototype.hasOwnProperty.call(profileData, 'apellidos')) {
       data.slug = await uniqueSlug(
         usuarioRepository,
         usuarioSlugSource({
-          nombre: profileData.nombre || current.nombre,
-          apellidos: profileData.apellidos || current.apellidos,
+          nombre: profileData.nombre ?? current.nombre,
+          apellidos: profileData.apellidos ?? current.apellidos,
         }),
         current._id.toString(),
         'usuario'
       );
     }
-    const updated = await usuarioRepository.update(current._id, data);
+
+    const updated = Object.keys(data).length
+      ? await usuarioRepository.update(current._id, data)
+      : current;
     if (!updated) throw new AppError('Usuario no encontrado', 404);
-    return serializeUsuario(updated);
+
+    if (Object.keys(profileData).length || !current.profile) {
+      await Profile.findOneAndUpdate(
+        { user: current._id },
+        { $set: profileData, $setOnInsert: profileDefaults },
+        { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+      );
+    }
+
+    const synchronizedUser = await usuarioRepository.findById(current._id);
+    if (!synchronizedUser?.profile) {
+      throw new AppError('No se pudo sincronizar el perfil del usuario', 500);
+    }
+    return serializeUsuario(synchronizedUser);
   }
 
   async eliminarUsuario(id) {

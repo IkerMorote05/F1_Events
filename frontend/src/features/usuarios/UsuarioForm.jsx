@@ -131,7 +131,7 @@ export const UsuarioForm = ({ initialData, submitting, onSubmit, onCancel }) => 
     await onSubmit({
       ...payload,
       ...(password ? { password } : {}),
-      ...(avatar ? { avatar } : {})
+      avatar: avatar || null
     }, imagesToSave);
   };
 

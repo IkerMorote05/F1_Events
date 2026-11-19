@@ -827,6 +827,58 @@ const swaggerDocument = {
         },
       },
     },
+    '/clasificacion/publica': {
+      get: {
+        tags: ['Clasificación'],
+        summary: 'Obtener los datos públicos de los mundiales de pilotos y escuderías',
+        responses: {
+          200: apiResponse('Clasificación pública', {
+            type: 'object',
+            properties: {
+              pilotos: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    _id: { type: 'string' },
+                    nombre: { type: 'string' },
+                    numero: { type: 'number' },
+                    nacionalidad: { type: 'string' },
+                    escuderia: {
+                      type: 'object',
+                      properties: {
+                        _id: { type: 'string' },
+                        nombre: { type: 'string' },
+                      },
+                      nullable: true,
+                    },
+                    estado: { type: 'string' },
+                    puntos: { type: 'number' },
+                    isActive: { type: 'boolean' },
+                    deletedAt: { type: 'string', nullable: true },
+                  },
+                },
+              },
+              escuderias: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    _id: { type: 'string' },
+                    nombre: { type: 'string' },
+                    pais: { type: 'string' },
+                    motor: { type: 'string' },
+                    jefe: { type: 'string' },
+                    isActive: { type: 'boolean' },
+                    deletedAt: { type: 'string', nullable: true },
+                  },
+                },
+              },
+            },
+          }),
+        },
+      },
+    },
   },
   components: {
     schemas: {

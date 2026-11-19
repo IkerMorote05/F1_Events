@@ -1,14 +1,40 @@
-import React from 'react';
-import { useEscuderias } from '../../hooks/useEscuderias';
-import { usePilotos } from '../../hooks/usePilotos';
+import React, { useEffect, useState } from 'react';
+import { getClasificacionPublica } from '../../services/clasificacionService';
 import { getNationalityDisplay } from '../../utils/nationality';
 import { calculateEscuderiaPoints } from '../../utils/escuderiaPoints';
 
 export const ClasificacionPage = () => {
-  const { items: pilotos, loading: pilotosLoading, error: pilotosError } = usePilotos();
-  const { items: escuderias, loading: escuderiasLoading, error: escuderiasError } = useEscuderias();
-  const loading = pilotosLoading || escuderiasLoading;
-  const error = pilotosError || escuderiasError;
+  const [pilotos, setPilotos] = useState([]);
+  const [escuderias, setEscuderias] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    getClasificacionPublica()
+      .then((data) => {
+        if (!Array.isArray(data?.pilotos) || !Array.isArray(data?.escuderias)) {
+          throw new Error('La respuesta de clasificación no tiene un formato válido.');
+        }
+        if (active) {
+          setPilotos(data.pilotos);
+          setEscuderias(data.escuderias);
+        }
+      })
+      .catch((requestError) => {
+        console.error('Error al cargar la clasificación:', requestError);
+        if (active) setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const pilotosActivos = pilotos.filter((piloto) => !piloto.deletedAt && piloto.isActive !== false);
   const escuderiasActivas = escuderias.filter((escuderia) => !escuderia.deletedAt && escuderia.isActive !== false);
   const puntosPorEscuderia = calculateEscuderiaPoints(pilotos);

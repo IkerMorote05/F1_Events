@@ -102,6 +102,7 @@ La aplicación estará disponible por defecto en `http://localhost:5173`.
 * La sesión se conserva en el navegador y el JWT se envía en las peticiones a la API.
 * El cierre de sesión revoca el JWT en el backend.
 * Las rutas de administración requieren una sesión con el rol `Admin`; al caducar el token, la sesión local se cierra.
+* La ruta `/profile` permite consultar y actualizar el perfil, el avatar y sus configuraciones.
 
 ### 🏆 Clasificación General (`/`)
 

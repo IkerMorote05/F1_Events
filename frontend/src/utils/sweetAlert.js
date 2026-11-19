@@ -1,11 +1,14 @@
 import Swal from 'sweetalert2';
 import { normalizeApiError } from './errorHandler';
 
-export const confirmDeletion = async (entityName = 'registro') => {
+export const confirmDeletion = async (
+  entityName = 'registro',
+  message = 'Esta acción no se puede deshacer.'
+) => {
   const result = await Swal.fire({
     icon: 'warning',
     title: `¿Eliminar ${entityName}?`,
-    text: 'Esta acción no se puede deshacer.',
+    text: message,
     showCancelButton: true,
     confirmButtonText: 'Eliminar',
     cancelButtonText: 'Cancelar',

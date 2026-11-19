@@ -9,6 +9,15 @@ class ClasificacionController {
       next(error);
     }
   }
+
+  async obtenerClasificacionPublica(req, res, next) {
+    try {
+      const datos = await clasificacionService.obtenerClasificacionPublica();
+      res.status(200).json({ status: 'success', data: datos });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new ClasificacionController();

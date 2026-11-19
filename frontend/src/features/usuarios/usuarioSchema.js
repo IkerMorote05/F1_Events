@@ -5,7 +5,7 @@ const userFields = {
   apellidos: z.string().trim().min(1, 'Los apellidos son obligatorios'),
   email: z.string().trim().email('Introduce un correo electrónico válido'),
   roles: z.string().min(1, 'Selecciona un rol'),
-  avatar: z.string().optional(),
+  avatar: z.union([z.string(), z.null()]).optional(),
   isActive: z.boolean()
 };
 

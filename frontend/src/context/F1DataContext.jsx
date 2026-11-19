@@ -1,10 +1,12 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from './AuthContext';
 import { getEscuderiasAdmin } from '../services/escuderiaService';
 import { getPilotosAdmin } from '../services/pilotoService';
 
 export const F1DataContext = createContext(null);
 
 export const F1DataProvider = ({ children }) => {
+  const { isAdmin } = useAuth();
   const [pilotos, setPilotos] = useState({
     items: [],
     loading: true,
@@ -76,9 +78,16 @@ export const F1DataProvider = ({ children }) => {
   const refreshEscuderias = useCallback(() => loadEscuderias({ force: true }), [loadEscuderias]);
 
   useEffect(() => {
+    if (!isAdmin) {
+      loaded.current = { pilotos: false, escuderias: false };
+      setPilotos({ items: [], loading: false, error: null });
+      setEscuderias({ items: [], loading: false, error: null });
+      return;
+    }
+
     loadPilotos();
     loadEscuderias();
-  }, [loadPilotos, loadEscuderias]);
+  }, [isAdmin, loadPilotos, loadEscuderias]);
 
   const value = useMemo(() => ({
     pilotos: { ...pilotos, reload: refreshPilotos, load: refreshPilotos },

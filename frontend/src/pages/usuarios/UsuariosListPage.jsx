@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Pencil, Power, Trash2 } from 'lucide-react';
 import { DataTable } from '../../components/DataTable';
 import { PilotoError } from '../../components/PilotoError';
@@ -10,6 +10,16 @@ import { confirmDeletion, showApiError, showSuccess } from '../../utils/sweetAle
 export const UsuariosListPage = () => {
   const navigate = useNavigate();
   const { items: usuarios, loading, error, load, updateItem, removeItem } = useUsuarios();
+  const getUsuarioName = (usuario) => (
+    `${usuario.profile?.nombre ?? usuario.nombre ?? ''} ${usuario.profile?.apellidos ?? usuario.apellidos ?? ''}`.trim()
+    || usuario.email
+  );
+  const getAvatarUrl = (usuario) => {
+    const profileHasAvatar = usuario.profile
+      && Object.prototype.hasOwnProperty.call(usuario.profile, 'avatar');
+    const avatar = profileHasAvatar ? usuario.profile.avatar : usuario.avatar;
+    return avatar?.image_url;
+  };
 
   const handleToggleActive = async (usuario) => {
     try {
@@ -23,8 +33,11 @@ export const UsuariosListPage = () => {
   };
 
   const handleDelete = async (usuario) => {
-    const name = `${usuario.nombre} ${usuario.apellidos || ''}`.trim();
-    if (!await confirmDeletion(`al usuario "${name}"`)) return;
+    const name = getUsuarioName(usuario);
+    if (!await confirmDeletion(
+      `al usuario "${name}"`,
+      'La cuenta se eliminará lógicamente y su perfil asociado se conservará.'
+    )) return;
     try {
       await removeItem(usuario._id);
       await showSuccess('Usuario eliminado correctamente');
@@ -40,15 +53,15 @@ export const UsuariosListPage = () => {
     {
       key: 'nombre',
       label: 'Usuario',
-      render: (usuario) => `${usuario.nombre} ${usuario.apellidos || ''}`.trim()
+      render: getUsuarioName
     },
     { key: 'email', label: 'Correo electrónico' },
     { key: 'roles', label: 'Rol', render: (usuario) => usuario.roles?.nombre || 'Sin asignar' },
     {
       key: 'avatar',
       label: 'Avatar',
-      render: (usuario) => usuario.avatar?.image_url
-        ? <a href={usuario.avatar.image_url} target="_blank" rel="noreferrer">Ver imagen</a>
+      render: (usuario) => getAvatarUrl(usuario)
+        ? <a href={getAvatarUrl(usuario)} target="_blank" rel="noreferrer">Ver imagen</a>
         : 'Sin avatar'
     },
     {
@@ -65,8 +78,8 @@ export const UsuariosListPage = () => {
             disabled={deleted}
             aria-pressed={!deleted && active}
             aria-label={deleted
-              ? `Usuario ${usuario.nombre} eliminado`
-              : `${active ? 'Desactivar' : 'Activar'} usuario ${usuario.nombre}`}
+              ? `Usuario ${getUsuarioName(usuario)} eliminado`
+              : `${active ? 'Desactivar' : 'Activar'} usuario ${getUsuarioName(usuario)}`}
           >
             <Power size={15} aria-hidden="true" />
             {deleted ? 'Eliminado' : active ? 'Activo' : 'Inactivo'}
@@ -79,20 +92,19 @@ export const UsuariosListPage = () => {
       label: 'Acciones',
       render: (usuario) => usuario.deletedAt ? '—' : (
         <div className="piloto-row-actions">
-          <button
-            type="button"
-            className="btn-edit team-action-button"
-            onClick={() => navigate(`/usuarios/${usuario._id}/editar`)}
-            aria-label={`Editar usuario ${usuario.nombre}`}
-            title="Editar"
+          <Link
+            className="btn-edit team-action-button team-edit-button"
+            to={`/usuarios/${usuario._id}/editar`}
+            aria-label={`Editar usuario ${getUsuarioName(usuario)}`}
           >
             <Pencil size={16} aria-hidden="true" />
-          </button>
+            <span>Editar</span>
+          </Link>
           <button
             type="button"
             className="btn-delete team-action-button"
             onClick={() => handleDelete(usuario)}
-            aria-label={`Eliminar usuario ${usuario.nombre}`}
+            aria-label={`Eliminar usuario ${getUsuarioName(usuario)}`}
             title="Eliminar"
           >
             <Trash2 size={16} aria-hidden="true" />
@@ -111,7 +123,7 @@ export const UsuariosListPage = () => {
         <div>
           <p className="piloto-eyebrow">Administración</p>
           <h1>Usuarios</h1>
-          <p>Gestiona las cuentas y sus roles.</p>
+          <p>Gestiona las cuentas, los perfiles asociados y sus roles.</p>
         </div>
         <button type="button" className="btn-primary" onClick={() => navigate('/usuarios/nuevo')}>
           + Nuevo usuario

@@ -30,6 +30,16 @@ export const AuthProvider = ({ children }) => {
     setSession(null);
   }, []);
 
+  const updateUser = useCallback((updatedUser) => {
+    if (!session) return;
+    const nextSession = {
+      ...session,
+      user: { ...session.user, ...updatedUser }
+    };
+    saveAuthSession(nextSession);
+    setSession(nextSession);
+  }, [session]);
+
   const logout = useCallback(async () => {
     if (!session?.token) {
       clearSession();
@@ -54,14 +64,32 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener(AUTH_EXPIRED_EVENT, clearSession);
   }, [clearSession]);
 
+  useEffect(() => {
+    const preference = session?.user?.profile?.settings?.theme;
+    const systemTheme = window.matchMedia?.('(prefers-color-scheme: light)');
+    const applyTheme = () => {
+      const theme = preference === 'light' || preference === 'dark'
+        ? preference
+        : systemTheme?.matches ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+    };
+
+    applyTheme();
+    if (preference === 'light' || preference === 'dark' || !systemTheme) return undefined;
+
+    systemTheme.addEventListener('change', applyTheme);
+    return () => systemTheme.removeEventListener('change', applyTheme);
+  }, [session]);
+
   const user = session?.user ?? null;
   const value = useMemo(() => ({
     user,
     isAuthenticated: Boolean(session?.token && user),
     isAdmin: user?.role?.toLowerCase() === 'admin',
     login,
-    logout
-  }), [session, user, login, logout]);
+    logout,
+    updateUser
+  }), [session, user, login, logout, updateUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -35,17 +35,32 @@ class ProfileService {
     const currentProfile = await Profile.findOne({ user: user._id });
     if (!currentProfile) throw new AppError('Perfil no encontrado', 404);
 
-    if (payload.avatar && !(await imageRepository.findById(payload.avatar))) {
+    const profileUpdate = { ...payload };
+    const avatarUrl = profileUpdate.avatarUrl;
+    delete profileUpdate.avatarUrl;
+
+    if (avatarUrl) {
+      const avatar = await imageRepository.create({
+        entity_type: 'Usuario',
+        entity_id: user._id,
+        image_url: avatarUrl,
+        alt_text: `Avatar de ${profileUpdate.nombre || currentProfile.nombre} ${profileUpdate.apellidos || currentProfile.apellidos}`,
+        position: 0,
+      });
+      profileUpdate.avatar = avatar._id;
+    }
+
+    if (profileUpdate.avatar && !(await imageRepository.findById(profileUpdate.avatar))) {
       throw new AppError('La imagen de avatar proporcionada no existe', 400);
     }
 
     const profile = await Profile.findByIdAndUpdate(
       currentProfile._id,
-      payload,
+      profileUpdate,
       { new: true, runValidators: true }
     );
     if (!profile) throw new AppError('Perfil no encontrado', 404);
-    if (payload.nombre || payload.apellidos) {
+    if (profileUpdate.nombre || profileUpdate.apellidos) {
       const slug = await uniqueSlug(
         usuarioRepository,
         `${profile.nombre}-${profile.apellidos}`,

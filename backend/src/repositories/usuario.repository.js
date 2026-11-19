@@ -3,7 +3,22 @@ const CrudRepository = require('./crud.repository');
 
 class UsuarioRepository extends CrudRepository {
   constructor() {
-    super(Usuario, ['roles', 'profile', 'profile.avatar', 'images']);
+    super(Usuario, [
+      'roles',
+      { path: 'profile', populate: { path: 'avatar' } },
+      'images',
+    ]);
+  }
+
+  async findAll(includeDeleted = false) {
+    const filter = includeDeleted ? {} : { deletedAt: null };
+    return this.Model.find(filter)
+      .populate('roles')
+      .populate({ path: 'profile', populate: { path: 'avatar' } });
+  }
+
+  async create(data) {
+    return this.Model.create(data);
   }
 
   async findByRole(roleId, includeDeleted = false) {

@@ -14,6 +14,7 @@ import {
   Ticket,
   LogIn,
   LogOut,
+  UserRound,
   ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -62,6 +63,13 @@ export const Navbar = () => {
               )}
               <div className="f1-nav-account-details">
                 <span className="f1-nav-user">{displayName}</span>
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) => `f1-nav-link f1-nav-profile-link${isActive ? ' active' : ''}`}
+                >
+                  <UserRound size={17} aria-hidden="true" />
+                  <span>Mi perfil</span>
+                </NavLink>
                 <button className="f1-nav-link f1-nav-auth-button" type="button" onClick={handleLogout}>
                   <LogOut size={17} aria-hidden="true" />
                   <span>Cerrar sesión</span>
