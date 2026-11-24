@@ -1,10 +1,11 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ClasificacionPage } from '../pages/clasificacion/ClasificacionPage';
+import { HomePage } from '../pages/home/HomePage';
 import { PilotoSkeleton } from '../components/PilotoSkeleton';
 import { GuardAdmin } from './guards/guardAdmin';
 import { GuardAuth } from './guards/guardAuth';
 
+const ClasificacionPage = lazy(() => import('../pages/clasificacion/ClasificacionPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage'));
 const PilotosListPage = lazy(() => import('../pages/pilotos/PilotosListPage'));
@@ -57,7 +58,8 @@ export const AppRouter = () => {
   return (
     <Suspense fallback={<PilotoSkeleton />}>
       <Routes>
-        <Route path="/" element={<ClasificacionPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/clasificacion" element={<ClasificacionPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<GuardAuth />}>
           <Route path="/profile" element={<ProfilePage />} />

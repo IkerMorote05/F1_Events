@@ -5,19 +5,8 @@ import { DataTable } from '../../components/DataTable';
 import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { useTicketTypes } from '../../hooks/useTicketTypes';
+import { formatPrice, getTicketTotalPrice } from '../../utils/formatters';
 import { confirmDeletion, showApiError, showSuccess } from '../../utils/sweetAlert';
-
-const formatPrice = (price) => Number(price).toLocaleString('es-ES', {
-  style: 'currency',
-  currency: 'EUR'
-});
-const getTotalPrice = (ticket) => (
-  ticket.basePrice !== undefined
-    && ticket.basePrice !== null
-    && Number.isFinite(Number(ticket.basePrice))
-    ? Number(ticket.basePrice) * Number(ticket.duration) + (Number(ticket.category?.price) || 0)
-    : Number(ticket.price) + (Number(ticket.category?.price) || 0)
-);
 
 export const TicketTypesListPage = () => {
   const navigate = useNavigate();
@@ -55,7 +44,9 @@ export const TicketTypesListPage = () => {
     {
       key: 'price',
       label: 'Precio',
-      render: (ticket) => Number.isFinite(getTotalPrice(ticket)) ? formatPrice(getTotalPrice(ticket)) : '—'
+      render: (ticket) => Number.isFinite(getTicketTotalPrice(ticket))
+        ? formatPrice(getTicketTotalPrice(ticket))
+        : '—'
     },
     { key: 'duration', label: 'Duración', render: (ticket) => `${ticket.duration} ${ticket.duration === 1 ? 'día' : 'días'}` },
     {

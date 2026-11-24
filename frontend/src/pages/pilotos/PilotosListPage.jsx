@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from '../../components/DataTable';
+import { NationalityBadge } from '../../components/NationalityBadge';
 import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { usePilotos } from '../../hooks/usePilotos';
-import { getNationalityDisplay } from '../../utils/nationality';
+import { getPilotFullName } from '../../utils/formatters';
 import { confirmPilotoDeletion, showPilotoError, showPilotoSuccess } from '../../utils/sweetAlert';
 import { Pencil, Power, RotateCcw, Trash2 } from 'lucide-react';
 
@@ -70,19 +71,12 @@ export const PilotosListPage = () => {
     {
       key: 'piloto',
       label: 'Piloto',
-      render: (piloto) => `${piloto.nombre} ${piloto.apellidos || ''}`.trim()
+      render: (piloto) => getPilotFullName(piloto)
     },
     {
       key: 'nacionalidad',
       label: 'Nacionalidad',
-      render: (piloto) => {
-        const display = getNationalityDisplay(piloto.nacionalidad);
-        return display.length
-          ? <span title={piloto.nacionalidad}>{display.map(({ flag, code }) => (
-              <span key={`${flag}-${code}`}><span className={`fi fi-${flag}`} aria-hidden="true" /> {code} </span>
-            ))}</span>
-          : piloto.nacionalidad || 'Sin asignar';
-      }
+      render: (piloto) => <NationalityBadge nationality={piloto.nacionalidad} />
     },
     {
       key: 'escuderia',

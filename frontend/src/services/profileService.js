@@ -1,6 +1,4 @@
-import { apiService } from './api';
-
-const getResponseData = (response) => response.data?.data ?? response.data;
+import { apiService, getResponseData } from './api';
 
 export const getMyProfile = async () => getResponseData(
   await apiService.get('/profile/me')

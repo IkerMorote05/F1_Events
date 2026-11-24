@@ -5,11 +5,8 @@ import { DataTable } from '../../components/DataTable';
 import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { useCarreras } from '../../hooks/useCarreras';
+import { formatDate } from '../../utils/formatters';
 import { confirmDeletion, showApiError, showSuccess } from '../../utils/sweetAlert';
-
-const formatDate = (value) => value
-  ? new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(value))
-  : 'N/A';
 
 export const CarrerasListPage = () => {
   const navigate = useNavigate();

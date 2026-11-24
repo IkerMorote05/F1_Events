@@ -41,15 +41,20 @@ const sources = [
     lookups: [
       ['categoria', CategoriaGlobal, '_shopCategory', 'categoria'],
       ['location', Location, '_shopLocation', 'location'],
+      ['tipo', CategoriaCircuitos, '_shopTipo', 'tipo'],
+      ['desgaste', CategoriaCircuitos, '_shopDesgaste', 'desgaste'],
     ],
     additions: [],
-    categoryPaths: ['categoria'],
+    categoryPaths: ['categoria', 'tipo', 'desgaste'],
     locationPaths: ['location'],
     circuitPaths: ['self'],
     racePaths: [],
     pilotPaths: [],
     escuderiaPaths: [],
-    searchPaths: ['nombre', 'location.pais', 'location.ciudad', 'categoria.competicion'],
+    searchPaths: [
+      'nombre', 'location.pais', 'location.ciudad',
+      'categoria.competicion', 'tipo.tipo', 'desgaste.desgaste',
+    ],
   },
   {
     type: 'race',
@@ -124,7 +129,10 @@ const getRelationPaths = (paths) => paths.map((path) => {
   return {
     id: `${prefix}._id`,
     slug: `${prefix}.slug`,
-    names: ['nombre', 'competicion', 'ciudad', 'pais', 'capital', 'sku'].map((field) => `${prefix}.${field}`),
+    names: [
+      'nombre', 'competicion', 'ciudad', 'pais', 'capital', 'sku',
+      'tipo', 'desgaste', 'categoriaEntrada', 'categoriaGrada',
+    ].map((field) => `${prefix}.${field}`),
   };
 });
 

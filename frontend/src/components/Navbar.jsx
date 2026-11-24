@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Flag,
+  Home,
   Layers,
   Route,
   Users,
@@ -86,6 +87,10 @@ export const Navbar = () => {
         </div>
         <div className="f1-nav-links">
           <NavLink to="/" end className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <Home size={17} aria-hidden="true" />
+            <span>Inicio</span>
+          </NavLink>
+          <NavLink to="/clasificacion" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
             <Trophy size={17} aria-hidden="true" />
             <span>Clasificación</span>
           </NavLink>

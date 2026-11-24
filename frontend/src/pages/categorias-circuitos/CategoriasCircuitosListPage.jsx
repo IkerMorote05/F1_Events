@@ -5,6 +5,7 @@ import { DataTable } from '../../components/DataTable';
 import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
 import { useCategoriasCircuitos } from '../../hooks/useCategoriasCircuitos';
+import { getCircuitCategoryLabel } from '../../utils/formatters';
 import { confirmDeletion, showApiError, showSuccess } from '../../utils/sweetAlert';
 
 export const CategoriasCircuitosListPage = () => {
@@ -30,7 +31,7 @@ export const CategoriasCircuitosListPage = () => {
   };
 
   const handleDelete = async (categoria) => {
-    const categoryName = categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada;
+    const categoryName = getCircuitCategoryLabel(categoria);
     if (!await confirmDeletion(`la categoría "${categoryName}"`)) return;
 
     try {
@@ -50,9 +51,7 @@ export const CategoriasCircuitosListPage = () => {
     {
       key: 'category',
       label: 'Categoría',
-      render: (categoria) => (
-        categoria.tipo || categoria.desgaste || categoria.categoriaEntrada || categoria.categoriaGrada || 'Sin nombre'
-      )
+      render: (categoria) => getCircuitCategoryLabel(categoria) || 'Sin nombre'
     },
     {
       key: 'field',

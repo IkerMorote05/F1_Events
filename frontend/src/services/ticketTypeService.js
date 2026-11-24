@@ -1,6 +1,4 @@
-import { apiService } from './api';
-
-const getResponseData = (response) => response.data?.data ?? response.data;
+import { apiService, getResponseData } from './api';
 
 export const getTicketTypesAdmin = async () => (
   await apiService.get('/ticket-types', { params: { includeDeleted: true } })
