@@ -294,16 +294,57 @@ const migrateUserProfilesAndPasswords = async () => {
     }
   }
 
-  return { profiles, passwords };
+  const userIds = new Set(users.map((user) => user._id.toString()));
+  const profileDocuments = await Profile.collection
+    .find({}, { projection: { _id: 1, user: 1 } })
+    .toArray();
+  const orphanProfileIds = profileDocuments
+    .filter((profile) => !profile.user || !userIds.has(profile.user.toString()))
+    .map((profile) => profile._id);
+  if (orphanProfileIds.length) {
+    await Profile.collection.deleteMany({ _id: { $in: orphanProfileIds } });
+  }
+
+  return { profiles, passwords, orphanProfiles: orphanProfileIds.length };
 };
 
 const ensureDefaultUserRole = async () => {
-  const role = await Rol.findOne({ nombre: 'Usuario' });
-  if (role) return;
-  await Rol.create({
-    nombre: 'Usuario',
-    description: 'Cuenta de usuario estándar',
-  });
+  let role = await Rol.findOne({ nombre: 'Usuario' });
+  if (!role) {
+    role = await Rol.create({
+      nombre: 'Usuario',
+      description: 'Cuenta de usuario estándar',
+    });
+  } else if (!role.isActive || role.deletedAt) {
+    role = await Rol.findByIdAndUpdate(
+      role._id,
+      { isActive: true, deletedAt: null, status: 'active' },
+      { new: true, runValidators: true }
+    );
+  }
+  return role;
+};
+
+const repairUserRoleReferences = async (defaultRoleId) => {
+  const users = await Usuario.collection.find({}).toArray();
+  let repaired = 0;
+
+  for (const user of users) {
+    const roleExists = user.roles
+      && await Rol.collection.findOne(
+        { _id: user.roles },
+        { projection: { _id: 1 } }
+      );
+    if (roleExists) continue;
+
+    await Usuario.collection.updateOne(
+      { _id: user._id },
+      { $set: { roles: defaultRoleId } }
+    );
+    repaired += 1;
+  }
+
+  return repaired;
 };
 
 const migrateExistingData = async () => {
@@ -352,13 +393,14 @@ const migrateExistingData = async () => {
     (document) => `${document.nombre}-${document.apellidos}`,
     true
   );
-  const { profiles, passwords } = await migrateUserProfilesAndPasswords();
   const roles = await migrateCollection(Rol, 'rol', (document) => document.nombre, true);
-  await ensureDefaultUserRole();
+  const defaultUserRole = await ensureDefaultUserRole();
+  const repairedUserRoles = await repairUserRoleReferences(defaultUserRole._id);
+  const { profiles, passwords, orphanProfiles } = await migrateUserProfilesAndPasswords();
   const circuitos = await migrateCircuitLocations();
 
   console.log(
-    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, índice único de SKU de tipos de entrada verificado, ${usuarios} usuarios y ${roles} roles revisados; ${profiles} perfiles creados y ${passwords} contraseñas protegidas con Argon2.`
+    `Migración completada: ${categorias} categorías globales, ${categoriasCircuitosGlobales} categorías globales de circuitos y ${categoriasCircuitos} categorías de tipo/desgaste referenciadas, ${escuderias} escuderías, ${pilotos} pilotos, ${circuitos} circuitos, ${locations} ubicaciones, ${images} imágenes, ${variants} variantes, índice único de SKU de tipos de entrada verificado, ${usuarios} usuarios y ${roles} roles revisados; ${repairedUserRoles} referencias de rol corregidas, ${profiles} perfiles creados, ${orphanProfiles} perfiles huérfanos eliminados y ${passwords} contraseñas protegidas con Argon2.`
   );
 };
 

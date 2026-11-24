@@ -31,8 +31,11 @@ class UsuarioService {
   }
 
   async validarRelaciones(data) {
-    if (data.roles && !(await rolRepository.findById(data.roles))) {
-      throw new AppError('El rol proporcionado no existe', 400);
+    if (data.roles) {
+      const role = await rolRepository.findById(data.roles);
+      if (!role || !role.isActive || role.deletedAt) {
+        throw new AppError('El rol proporcionado no existe o no está activo', 400);
+      }
     }
     if (data.avatar && !(await imageRepository.findById(data.avatar))) {
       throw new AppError('La imagen de avatar proporcionada no existe', 400);

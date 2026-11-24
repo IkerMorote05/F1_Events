@@ -14,37 +14,42 @@ const authRoutes = require('./auth.routes');
 const profileRoutes = require('./profile.routes');
 const categoriaGlobalRoutes = require('./categoria-global.routes');
 const categoriaCircuitosRoutes = require('./categoria-circuitos.routes');
+const shopRoutes = require('./shop.routes');
 const AppError = require('../utils/appError');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
 const router = Router();
 
 router.use('/auth', authRoutes);
-router.use('/profile', profileRoutes);
-router.use('/usuarios', usuarioRoutes);
-router.use('/clasificacion', clasificacionRoutes);
 
-const protectedPaths = [
+const publicGetPaths = [
   '/clasificacion',
   '/pilotos',
   '/escuderias',
   '/circuitos',
   '/carreras',
   '/ticket-types',
-  '/images',
   '/locations',
   '/variants',
-  '/roles',
   '/categorias-globales',
   '/categorias-circuitos',
+  '/shop',
 ];
-const writeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-router.use(protectedPaths, authenticate);
-router.use(protectedPaths, (req, res, next) => {
-  if (!writeMethods.has(req.method)) return next();
-  return authorize('Admin')(req, res, next);
+router.use((req, res, next) => {
+  const isPublicGet = req.method === 'GET'
+    && publicGetPaths.some((path) => req.path === path || req.path.startsWith(`${path}/`));
+
+  if (isPublicGet) return next();
+
+  return authenticate(req, res, (error) => {
+    if (error) return next(error);
+    return authorize('Admin')(req, res, next);
+  });
 });
 
+router.use('/profile', profileRoutes);
+router.use('/usuarios', usuarioRoutes);
+router.use('/clasificacion', clasificacionRoutes);
 router.use('/pilotos', pilotoRoutes);
 router.use('/escuderias', escuderiaRoutes);
 router.use('/circuitos', circuitoRoutes);
@@ -56,6 +61,7 @@ router.use('/variants', variantRoutes);
 router.use('/roles', rolRoutes);
 router.use('/categorias-globales', categoriaGlobalRoutes);
 router.use('/categorias-circuitos', categoriaCircuitosRoutes);
+router.use('/shop', shopRoutes);
 
 router.use((req, res, next) => {
   next(new AppError(`Ruta no encontrada: ${req.originalUrl}`, 404));

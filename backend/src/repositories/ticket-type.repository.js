@@ -31,6 +31,16 @@ class TicketTypeRepository extends CrudRepository {
     return TicketType.exists({ race: id });
   }
 
+  findAvailableByRaceAndCircuit(race, circuit) {
+    return this.populate(TicketType.find({
+      race,
+      circuit,
+      estado: 'Disponible',
+      isActive: { $ne: false },
+      deletedAt: null,
+    }).sort({ duration: 1, price: 1, sku: 1 }));
+  }
+
   async findByIdentifier(identifier) {
     const bySku = await this.findBySku(identifier);
     if (bySku) return bySku;
