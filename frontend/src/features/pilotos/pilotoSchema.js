@@ -19,7 +19,8 @@ export const pilotoSchema = z.object({
   escuderia: z.string(),
   estado: z.enum(['compitiendo', 'agente libre', 'lesion', 'retirado', 'piloto reserva']),
   categoria: z.string().min(1, 'Selecciona una categoría'),
-  fecha_nacimiento: z.string().optional()
+  fecha_nacimiento: z.string().optional(),
+  isActive: z.boolean()
 }).superRefine(({ estado, escuderia }, context) => {
   if (['compitiendo', 'lesion', 'piloto reserva'].includes(estado) && !escuderia) {
     context.addIssue({

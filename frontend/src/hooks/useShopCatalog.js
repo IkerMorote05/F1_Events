@@ -10,10 +10,11 @@ const DEFAULT_FILTERS = {
   search: '',
   type: '',
   categories: [],
+  escuderias: [],
   localizacion: '',
   minPrice: '',
   maxPrice: '',
-  sort: '',
+  sorts: [],
   limit: 12,
   offset: 0
 };
@@ -53,25 +54,35 @@ const getBirthTimestamp = (pilot) => {
   return Number.isFinite(time) ? time : NaN;
 };
 
-const sortPilots = (items, sortKey) => {
-  if (!sortKey || !VALID_PILOT_SORTS.has(sortKey) || items.length < 2) return items;
-  const [field, order] = sortKey.split('_');
-  const direction = order === 'desc' ? -1 : 1;
+const sortPilots = (items, sortKeys) => {
+  const validSorts = sortKeys.filter((sortKey) => VALID_PILOT_SORTS.has(sortKey));
+  if (!validSorts.length || items.length < 2) return items;
 
   return [...items].sort((left, right) => {
-    switch (field) {
-      case 'numero':
-        return compareNullableNumbers(Number(left.numero), Number(right.numero), direction);
-      case 'edad':
-        // Smaller birth timestamp = older; ascending age (youngest first) sorts by descending timestamp.
-        return compareNullableNumbers(getBirthTimestamp(left), getBirthTimestamp(right), -direction);
-      case 'nombre':
-        return compareNullableStrings(getPilotFullName(left), getPilotFullName(right), direction);
-      case 'escuderia':
-        return compareNullableStrings(left.escuderia?.nombre, right.escuderia?.nombre, direction);
-      default:
-        return 0;
+    for (const sortKey of validSorts) {
+      const [field, order] = sortKey.split('_');
+      const direction = order === 'desc' ? -1 : 1;
+      let comparison = 0;
+      switch (field) {
+        case 'numero':
+          comparison = compareNullableNumbers(Number(left.numero), Number(right.numero), direction);
+          break;
+        case 'edad':
+          // Smaller birth timestamp = older; ascending age (youngest first) sorts by descending timestamp.
+          comparison = compareNullableNumbers(getBirthTimestamp(left), getBirthTimestamp(right), -direction);
+          break;
+        case 'nombre':
+          comparison = compareNullableStrings(getPilotFullName(left), getPilotFullName(right), direction);
+          break;
+        case 'escuderia':
+          comparison = compareNullableStrings(left.escuderia?.nombre, right.escuderia?.nombre, direction);
+          break;
+        default:
+          break;
+      }
+      if (comparison !== 0) return comparison;
     }
+    return 0;
   });
 };
 
@@ -86,7 +97,7 @@ const parseFiltersFromSearchParams = (searchParams, defaults) => {
   const rawOffset = Number(searchParams.get('offset'));
   const rawLimit = Number(searchParams.get('limit'));
 
-  const rawSort = searchParams.get('sort') ?? defaults.sort;
+  const rawSort = searchParams.get('sort');
 
   return {
     ...defaults,
@@ -95,10 +106,14 @@ const parseFiltersFromSearchParams = (searchParams, defaults) => {
     categories: rawCategories
       ? rawCategories.split(',').map((item) => item.trim()).filter(Boolean)
       : defaults.categories,
+    escuderias: (searchParams.get('escuderia') || '')
+      .split(',').map((item) => item.trim()).filter(Boolean),
     localizacion: searchParams.get('localizacion') ?? defaults.localizacion,
     minPrice: searchParams.get('minPrice') ?? defaults.minPrice,
     maxPrice: searchParams.get('maxPrice') ?? defaults.maxPrice,
-    sort: VALID_PILOT_SORTS.has(rawSort) ? rawSort : '',
+    sorts: rawSort
+      ? rawSort.split(',').map((item) => item.trim()).filter((item) => VALID_PILOT_SORTS.has(item))
+      : defaults.sorts,
     limit: Number.isSafeInteger(rawLimit) && rawLimit >= 1 && rawLimit <= 100 ? rawLimit : defaults.limit,
     offset: Number.isSafeInteger(rawOffset) && rawOffset >= 0 ? rawOffset : defaults.offset
   };
@@ -109,10 +124,11 @@ const buildSearchParamsFromFilters = (filters, defaults) => {
   if (filters.search?.trim()) params.set('search', filters.search.trim());
   if (filters.type) params.set('type', filters.type);
   if (filters.categories?.length) params.set('category', filters.categories.join(','));
+  if (filters.escuderias?.length) params.set('escuderia', filters.escuderias.join(','));
   if (filters.localizacion) params.set('localizacion', filters.localizacion);
   if (filters.minPrice !== '' && filters.minPrice !== undefined) params.set('minPrice', String(filters.minPrice));
   if (filters.maxPrice !== '' && filters.maxPrice !== undefined) params.set('maxPrice', String(filters.maxPrice));
-  if (filters.type === 'pilot' && VALID_PILOT_SORTS.has(filters.sort)) params.set('sort', filters.sort);
+  if (filters.type === 'pilot' && filters.sorts?.length) params.set('sort', filters.sorts.join(','));
   if (filters.limit && filters.limit !== defaults.limit) params.set('limit', String(filters.limit));
   if (filters.offset > 0) params.set('offset', String(filters.offset));
   return params;
@@ -142,6 +158,7 @@ export const useShopCatalog = ({
     filters.search.trim()
     || filters.type
     || filters.categories.length > 0
+    || filters.escuderias.length > 0
     || filters.localizacion
     || minPriceValue !== undefined
     || maxPriceValue !== undefined
@@ -151,12 +168,13 @@ export const useShopCatalog = ({
     search: filters.search.trim() || undefined,
     type: filters.type || undefined,
     category: filters.categories.length ? filters.categories.join(',') : undefined,
+    escuderia: filters.escuderias.length ? filters.escuderias.join(',') : undefined,
     localizacion: filters.localizacion || undefined,
     minPrice: minPriceValue,
     maxPrice: maxPriceValue,
     limit: filters.limit,
     offset: filters.offset
-  }), [filters.categories, filters.limit, filters.localizacion, filters.offset, filters.search, filters.type, maxPriceValue, minPriceValue]);
+  }), [filters.categories, filters.escuderias, filters.limit, filters.localizacion, filters.offset, filters.search, filters.type, maxPriceValue, minPriceValue]);
 
   const fetcher = useCallback(() => getShopCatalog(queryParams), [queryParams]);
 
@@ -197,15 +215,35 @@ export const useShopCatalog = ({
     });
   }, [applyFilters]);
 
+  const toggleEscuderia = useCallback((value) => {
+    applyFilters((current) => {
+      const exists = current.escuderias.includes(value);
+      const escuderias = exists
+        ? current.escuderias.filter((item) => item !== value)
+        : [...current.escuderias, value];
+      return { ...current, escuderias, offset: 0 };
+    });
+  }, [applyFilters]);
+
+  const toggleSort = useCallback((value) => {
+    applyFilters((current) => {
+      const exists = current.sorts.includes(value);
+      const sorts = exists
+        ? current.sorts.filter((item) => item !== value)
+        : [...current.sorts, value];
+      return { ...current, sorts, offset: 0 };
+    });
+  }, [applyFilters]);
+
   const resetFilters = useCallback(() => {
     applyFilters(() => defaults);
   }, [applyFilters, defaults]);
 
   const sortedItems = useMemo(() => {
     const rawItems = data?.items || [];
-    if (filters.type !== 'pilot' || !filters.sort) return rawItems;
-    return sortPilots(rawItems, filters.sort);
-  }, [data?.items, filters.sort, filters.type]);
+    if (filters.type !== 'pilot' || !filters.sorts.length) return rawItems;
+    return sortPilots(rawItems, filters.sorts);
+  }, [data?.items, filters.sorts, filters.type]);
 
   return {
     filters,
@@ -218,6 +256,8 @@ export const useShopCatalog = ({
     reload,
     updateFilters,
     toggleCategory,
+    toggleEscuderia,
+    toggleSort,
     resetFilters
   };
 };

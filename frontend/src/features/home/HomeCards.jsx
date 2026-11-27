@@ -19,6 +19,13 @@ import {
   getTicketTotalPrice
 } from '../../utils/formatters';
 
+const getContrastColor = (hexColor) => {
+  const hex = hexColor.replace('#', '');
+  const channels = [0, 2, 4].map((index) => parseInt(hex.slice(index, index + 2), 16));
+  const luminance = (channels[0] * 299 + channels[1] * 587 + channels[2] * 114) / 1000;
+  return luminance > 150 ? '#111827' : '#ffffff';
+};
+
 /* ── Shared media thumbnail ───────────────────────────────── */
 export const HomeCardMedia = ({ entity }) => {
   const image = getEntityImage(entity);
@@ -145,7 +152,10 @@ export const PilotCard = ({ piloto, className = '' }) => {
     <article className={`f1-card home-card home-pilot-card ${className}`.trim()}>
       <div
         className="f1-card-header f1-pilot-header"
-        style={{ background: `linear-gradient(135deg, ${teamColor} 0%, #111827 80%)` }}
+        style={{
+          background: `linear-gradient(135deg, ${teamColor} 0%, #111827 82%)`,
+          '--pilot-number-color': getContrastColor(teamColor)
+        }}
       >
         <h3>{getPilotFullName(piloto)}</h3>
         <span className="f1-number">#{piloto.numero}</span>

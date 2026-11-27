@@ -9,7 +9,8 @@ const emptyForm = {
   categoria: '',
   siglas: '',
   jefe: '',
-  año: ''
+  año: '',
+  isActive: true
 };
 const getReferenceId = (value) => value?._id || value || '';
 
@@ -33,7 +34,8 @@ export const EscuderiaForm = ({ initialData, submitting, onSubmit, onCancel }) =
           categoria: getReferenceId(initialData.categoria),
           siglas: initialData.siglas || '',
           jefe: initialData.jefe || initialData.jefeEquipo || '',
-          año: String(initialData.año ?? initialData.anioFundacion ?? '')
+          año: String(initialData.año ?? initialData.anioFundacion ?? ''),
+          isActive: initialData.isActive !== false
         }
       : { ...emptyForm });
     setImages(Array.isArray(initialData?.images)
@@ -177,6 +179,14 @@ export const EscuderiaForm = ({ initialData, submitting, onSubmit, onCancel }) =
         onChange={handleChange} aria-invalid={Boolean(errors.año)}
         aria-describedby={errors.año ? 'año-error' : undefined} />
       {fieldError('año')}
+
+      <label htmlFor="escuderia-isActive">Estado de la ficha</label>
+      <select id="escuderia-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <section className="piloto-images-section" aria-labelledby="escuderia-images-title">
         <div className="piloto-images-header">

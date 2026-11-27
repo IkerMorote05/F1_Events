@@ -14,7 +14,8 @@ export const escuderiaSchema = z.object({
   categoria: z.string().min(1, 'Selecciona una categoría'),
   siglas: z.string().trim().optional(),
   jefe: z.string().trim().optional(),
-  año: optionalInteger('El año', 1900)
+  año: optionalInteger('El año', 1900),
+  isActive: z.boolean()
 });
 
 export const escuderiaImageSchema = z.object({

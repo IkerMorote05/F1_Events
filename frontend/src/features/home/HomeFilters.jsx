@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowUpDown, Euro, Layers, MapPin, Route, SlidersHorizontal, Ticket, X } from 'lucide-react';
+import { ArrowUpDown, Euro, Flag, Layers, MapPin, Route, SlidersHorizontal, Ticket, X } from 'lucide-react';
 import { SearchBar } from '../../components/SearchBar';
 
 const TYPE_OPTIONS = [
@@ -12,7 +12,6 @@ const TYPE_OPTIONS = [
 ];
 
 const PILOT_SORT_OPTIONS = [
-  { value: '', label: 'Por defecto' },
   { value: 'numero_asc', label: 'Número: menor a mayor' },
   { value: 'numero_desc', label: 'Número: mayor a menor' },
   { value: 'edad_asc', label: 'Edad: menor a mayor' },
@@ -59,12 +58,18 @@ const CategoryChipGroup = ({ title, items, labelKey, selectedValues, onToggle })
 export const HomeFilters = ({
   filters,
   categories,
+  escuderias,
   localizaciones,
   hasActiveFilters,
   hasInvalidPriceRange,
   onUpdateFilters,
   onToggleCategory,
-  onResetFilters
+  onToggleEscuderia,
+  onToggleSort,
+  onResetFilters,
+  id,
+  mobileOpen = false,
+  onClose
 }) => {
   const [priceInputs, setPriceInputs] = useState({
     minPrice: filters.minPrice || '',
@@ -113,6 +118,7 @@ export const HomeFilters = ({
   const showCircuitFilters = CIRCUIT_TYPES.has(filters.type);
   const showTicketFilters = TICKET_TYPES.has(filters.type);
   const showPilotSort = filters.type === 'pilot';
+  const showTeamFilters = (filters.type === 'pilot' || filters.type === 'escuderia') && escuderias.length > 0;
 
   const handleTypeSelect = (nextType) => {
     const allowedCategories = new Set(groupedCategories.global.map(getFilterKey));
@@ -131,7 +137,8 @@ export const HomeFilters = ({
       localizacion: LOCATION_TYPES.has(nextType) ? filters.localizacion : '',
       minPrice: TICKET_TYPES.has(nextType) ? filters.minPrice : '',
       maxPrice: TICKET_TYPES.has(nextType) ? filters.maxPrice : '',
-      sort: nextType === 'pilot' ? filters.sort : ''
+      sorts: nextType === 'pilot' ? filters.sorts : [],
+      escuderias: nextType === 'pilot' || nextType === 'escuderia' ? filters.escuderias : []
     });
   };
 
@@ -140,18 +147,30 @@ export const HomeFilters = ({
   };
 
   return (
-    <aside className="home-filters-panel home-sidebar" aria-label="Búsqueda y filtros del catálogo">
+    <aside
+      id={id}
+      className={`home-filters-panel home-sidebar${mobileOpen ? ' is-mobile-open' : ''}`}
+      aria-label="Búsqueda y filtros del catálogo"
+    >
       <div className="home-sidebar-header">
         <span className="home-sidebar-title">
           <SlidersHorizontal size={17} aria-hidden="true" />
           <span>Filtros</span>
         </span>
-        {hasActiveFilters ? (
-          <button type="button" className="home-clear-link" onClick={onResetFilters}>
-            <X size={14} aria-hidden="true" />
-            <span>Limpiar</span>
-          </button>
-        ) : null}
+        <div className="home-sidebar-actions">
+          {hasActiveFilters ? (
+            <button type="button" className="home-clear-link" onClick={onResetFilters}>
+              <X size={14} aria-hidden="true" />
+              <span>Limpiar</span>
+            </button>
+          ) : null}
+          {onClose ? (
+            <button type="button" className="home-filter-close" onClick={onClose}>
+              <X size={16} aria-hidden="true" />
+              <span>Cerrar</span>
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <SearchBar value={filters.search} onSearch={handleSearch} />
@@ -179,22 +198,49 @@ export const HomeFilters = ({
 
       {showPilotSort ? (
         <div className="home-filter-group">
-          <label className="home-filter-label" htmlFor="pilot-sort-select">
+          <span className="home-filter-label">
             <ArrowUpDown size={15} aria-hidden="true" />
             <span>Ordenar pilotos</span>
-          </label>
-          <select
-            id="pilot-sort-select"
-            className="home-sort-select"
-            value={filters.sort || ''}
-            onChange={(event) => onUpdateFilters({ sort: event.target.value, offset: filters.offset })}
-          >
+          </span>
+          <div className="home-checklist" role="group" aria-label="Criterios para ordenar pilotos">
             {PILOT_SORT_OPTIONS.map((option) => (
-              <option key={option.value || 'default'} value={option.value}>
-                {option.label}
-              </option>
+              <label key={option.value} className="home-checklist-option">
+                <input
+                  type="checkbox"
+                  checked={filters.sorts.includes(option.value)}
+                  onChange={() => onToggleSort(option.value)}
+                />
+                <span>{option.label}</span>
+              </label>
             ))}
-          </select>
+          </div>
+        </div>
+      ) : null}
+
+      {showTeamFilters ? (
+        <div className="home-filter-group">
+          <details className="home-filter-dropdown">
+            <summary className="home-filter-label">
+              <Flag size={15} aria-hidden="true" />
+              <span>Escuderías</span>
+              <span className="home-filter-count">{filters.escuderias.length || 'Todas'}</span>
+            </summary>
+            <div className="home-checklist home-team-checklist">
+            {escuderias.map((escuderia) => {
+              const value = getFilterKey(escuderia);
+              return (
+                <label key={escuderia._id} className="home-checklist-option">
+                  <input
+                    type="checkbox"
+                    checked={filters.escuderias.includes(value)}
+                    onChange={() => onToggleEscuderia(value)}
+                  />
+                  <span>{escuderia.siglas ? `${escuderia.siglas} · ` : ''}{escuderia.nombre}</span>
+                </label>
+              );
+            })}
+            </div>
+          </details>
         </div>
       ) : null}
 

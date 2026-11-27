@@ -3,16 +3,18 @@ import { categoriaGlobalSchema } from './categoriaGlobalSchema';
 
 export const CategoriaGlobalForm = ({ initialData, submitting, onSubmit, onCancel }) => {
   const [competicion, setCompeticion] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     setCompeticion(initialData?.competicion || '');
+    setIsActive(initialData?.isActive !== false);
     setError('');
   }, [initialData]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const result = categoriaGlobalSchema.safeParse({ competicion });
+    const result = categoriaGlobalSchema.safeParse({ competicion, isActive });
 
     if (!result.success) {
       setError(result.error.issues[0]?.message || 'Revisa el nombre de la competición.');
@@ -41,6 +43,13 @@ export const CategoriaGlobalForm = ({ initialData, submitting, onSubmit, onCance
       {error ? (
         <p className="piloto-field-error" id="categoria-global-error">{error}</p>
       ) : null}
+
+      <label htmlFor="categoria-global-isActive">Estado de la ficha</label>
+      <select id="categoria-global-isActive" value={String(isActive)}
+        onChange={(event) => setIsActive(event.target.value === 'true')} disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <div className="modal-actions">
         <button type="submit" className="btn-primary" disabled={submitting}>

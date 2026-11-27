@@ -4,6 +4,7 @@ import { categoriaCircuitosSchema } from './categoriaCircuitosSchema';
 export const CategoriaCircuitosForm = ({ initialData, submitting, onSubmit, onCancel }) => {
   const [field, setField] = useState('tipo');
   const [value, setValue] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState('');
   const fieldLocked = Boolean(initialData);
 
@@ -17,12 +18,13 @@ export const CategoriaCircuitosForm = ({ initialData, submitting, onSubmit, onCa
           : 'categoriaGrada';
     setField(initialData ? initialField : 'tipo');
     setValue(initialData?.[initialField] || '');
+    setIsActive(initialData?.isActive !== false);
     setError('');
   }, [initialData]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const result = categoriaCircuitosSchema.safeParse({ field, value });
+    const result = categoriaCircuitosSchema.safeParse({ field, value, isActive });
 
     if (!result.success) {
       setError(result.error.issues[0]?.message || 'Revisa los datos de la categoría.');
@@ -71,6 +73,13 @@ export const CategoriaCircuitosForm = ({ initialData, submitting, onSubmit, onCa
       {error ? (
         <p className="piloto-field-error" id="categoria-circuitos-error">{error}</p>
       ) : null}
+
+      <label htmlFor="categoria-circuitos-isActive">Estado de la ficha</label>
+      <select id="categoria-circuitos-isActive" value={String(isActive)}
+        onChange={(event) => setIsActive(event.target.value === 'true')} disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <div className="modal-actions">
         <button type="submit" className="btn-primary" disabled={submitting}>

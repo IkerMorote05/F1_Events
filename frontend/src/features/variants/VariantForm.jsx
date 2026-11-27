@@ -9,6 +9,7 @@ export const VariantForm = ({ initialData, submitting, onSubmit, onCancel }) => 
   const [percentage, setPercentage] = useState('');
   const [categoriaEntrada, setCategoriaEntrada] = useState('');
   const [categoriaGrada, setCategoriaGrada] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState('');
   const { items: categories, loading: categoriesLoading, error: categoriesError } = useCategoriasCircuitos();
 
@@ -35,6 +36,7 @@ export const VariantForm = ({ initialData, submitting, onSubmit, onCancel }) => 
     setPercentage(initialData?.percentage === undefined ? '' : String(initialData.percentage));
     setCategoriaEntrada(initialData?.categoriaEntrada?._id || initialData?.categoriaEntrada || '');
     setCategoriaGrada(initialData?.categoriaGrada?._id || initialData?.categoriaGrada || '');
+    setIsActive(initialData?.isActive !== false);
     setError('');
   }, [initialData]);
 
@@ -46,7 +48,8 @@ export const VariantForm = ({ initialData, submitting, onSubmit, onCancel }) => 
       descripcion,
       percentage,
       categoriaEntrada,
-      categoriaGrada
+      categoriaGrada,
+      isActive
     });
     if (!result.success) {
       setError(result.error.issues[0]?.message || 'Revisa los datos de la variante.');
@@ -153,6 +156,13 @@ export const VariantForm = ({ initialData, submitting, onSubmit, onCancel }) => 
         ))}
       </select>
       {categoriesError ? <p className="piloto-field-error" role="alert">{categoriesError}</p> : null}
+
+      <label htmlFor="variant-isActive">Estado de la ficha</label>
+      <select id="variant-isActive" value={String(isActive)}
+        onChange={(event) => setIsActive(event.target.value === 'true')} disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <div className="modal-actions">
         <button type="submit" className="btn-primary" disabled={submitting}>

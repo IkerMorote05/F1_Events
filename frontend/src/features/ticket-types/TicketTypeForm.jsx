@@ -24,7 +24,8 @@ export const TicketTypeForm = ({
     price: '',
     duration: '1',
     category: '',
-    estado: 'Disponible'
+    estado: 'Disponible',
+    isActive: true
   });
   const [errors, setErrors] = useState({});
 
@@ -37,7 +38,8 @@ export const TicketTypeForm = ({
           price: String(initialData.basePrice ?? initialData.price ?? ''),
           duration: String(initialData.duration ?? 1),
           category: getId(initialData.category),
-          estado: initialData.estado || 'Disponible'
+          estado: initialData.estado || 'Disponible',
+          isActive: initialData.isActive !== false
         }
       : {
           sku: '',
@@ -46,7 +48,8 @@ export const TicketTypeForm = ({
           price: '',
           duration: '1',
           category: '',
-          estado: 'Disponible'
+          estado: 'Disponible',
+          isActive: true
         });
     setErrors({});
   }, [initialData]);
@@ -244,6 +247,14 @@ export const TicketTypeForm = ({
         <option value="Reembolsada">Reembolsada</option>
       </select>
       {fieldError('estado')}
+
+      <label htmlFor="ticket-type-isActive">Estado de la ficha</label>
+      <select id="ticket-type-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
       {variantesDisponibles.length === 0 ? (
         <p className="piloto-field-hint">
           No hay variantes con categorías de entrada y grada y porcentaje configurado. Completa una variante antes de crear entradas.

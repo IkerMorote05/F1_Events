@@ -11,7 +11,8 @@ const emptyForm = {
   desgaste: '',
   tiempoVueltaRapida: '',
   pilotoVueltaRapida: '',
-  anioVueltaRapida: ''
+  anioVueltaRapida: '',
+  isActive: true
 };
 
 const getReferenceId = (value) => value?._id || value || '';
@@ -44,7 +45,8 @@ export const CircuitoForm = ({
           pilotoVueltaRapida: vueltaRapida?.piloto || '',
           anioVueltaRapida: vueltaRapida?.anio
             ? String(new Date(vueltaRapida.anio).getUTCFullYear())
-            : ''
+            : '',
+          isActive: initialData.isActive !== false
         }
       : { ...emptyForm });
     setImages(Array.isArray(initialData?.images)
@@ -233,6 +235,14 @@ export const CircuitoForm = ({
           value={formData.anioVueltaRapida} onChange={handleChange} {...fieldProps('anioVueltaRapida')} />
         {fieldError('anioVueltaRapida')}
       </fieldset>
+
+      <label htmlFor="circuito-isActive">Estado de la ficha</label>
+      <select id="circuito-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+      </select>
 
       <section className="piloto-images-section" aria-labelledby="circuito-images-title">
         <div className="piloto-images-header">

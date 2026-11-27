@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { normalizeApiError } from '../utils/errorHandler';
+import { AppLogo } from './AppLogo';
 
 export const Navbar = () => {
   const { user, isAdmin, logout } = useAuth();
@@ -47,11 +48,10 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="f1-navbar">
+    <header className={`f1-navbar${isAdmin ? ' is-admin' : ' is-public'}`}>
       <nav className="f1-navbar-inner" aria-label="Navegación principal">
         <NavLink to="/" end className="f1-brand" aria-label="F1 Classification, inicio">
-          <span className="f1-brand-kicker">FIA Formula One</span>
-          <span className="f1-brand-title"><Flag size={19} aria-hidden="true" /> F1 Classification</span>
+          <AppLogo size={38} title="Apex F1" />
         </NavLink>
         <div className="f1-nav-auth">
           {user ? (

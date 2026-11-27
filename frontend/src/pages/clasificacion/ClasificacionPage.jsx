@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NationalityBadge } from '../../components/NationalityBadge';
 import { PilotoError } from '../../components/PilotoError';
 import { PilotoSkeleton } from '../../components/PilotoSkeleton';
@@ -8,7 +8,12 @@ import { getPilotFullName } from '../../utils/formatters';
 
 export const ClasificacionPage = () => {
   const { pilotos, escuderias, loading, error, reload } = useClasificacion();
+  const [view, setView] = useState('pilotos');
 
+  const pilotosActivos = pilotos.filter((piloto) => !piloto.deletedAt && piloto.isActive !== false);
+  const escuderiasActivas = escuderias.filter(
+    (escuderia) => !escuderia.deletedAt && escuderia.isActive !== false
+  );
   if (loading) return <PilotoSkeleton resourceName="clasificación" />;
   if (error) {
     return (
@@ -20,10 +25,6 @@ export const ClasificacionPage = () => {
     );
   }
 
-  const pilotosActivos = pilotos.filter((piloto) => !piloto.deletedAt && piloto.isActive !== false);
-  const escuderiasActivas = escuderias.filter(
-    (escuderia) => !escuderia.deletedAt && escuderia.isActive !== false
-  );
   const puntosPorEscuderia = calculateEscuderiaPoints(pilotos);
   const escuderiasOrdenadas = escuderiasActivas
     .map((escuderia) => ({
@@ -31,7 +32,7 @@ export const ClasificacionPage = () => {
       puntos: puntosPorEscuderia.get(String(escuderia._id)) || 0
     }))
     .sort((a, b) => b.puntos - a.puntos);
-  const pilotosOrdenados = [...pilotosActivos].sort((a, b) => (b.puntos || 0) - (a.puntos || 0));
+  const pilotosOrdenados = [...pilotosActivos].sort((a, b) => (Number(b.puntos) || 0) - (Number(a.puntos) || 0));
 
   return (
     <section className="page-container clasificacion-page">
@@ -43,8 +44,36 @@ export const ClasificacionPage = () => {
         </div>
       </header>
 
-      <h2>Mundial de Pilotos</h2>
-      {pilotosActivos.length === 0 ? (
+      <div className="classification-view-switch" role="tablist" aria-label="Tipo de clasificación">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'pilotos'}
+          className={view === 'pilotos' ? 'is-active' : ''}
+          onClick={() => setView('pilotos')}
+        >
+          Mundial de pilotos
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === 'escuderias'}
+          className={view === 'escuderias' ? 'is-active' : ''}
+          onClick={() => setView('escuderias')}
+        >
+          Mundial de escuderías
+        </button>
+      </div>
+
+      {view === 'pilotos' ? <>
+      <div className="classification-section-heading">
+        <div>
+          <p className="piloto-eyebrow">Clasificación individual</p>
+          <h2>Mundial de Pilotos</h2>
+        </div>
+        <span className="classification-result-count">{pilotosOrdenados.length} pilotos</span>
+      </div>
+      {pilotosOrdenados.length === 0 ? (
         <p>No hay pilotos registrados en la base de datos.</p>
       ) : (
         <div className="piloto-table-container">
@@ -61,7 +90,7 @@ export const ClasificacionPage = () => {
             </thead>
             <tbody>
               {pilotosOrdenados.map((piloto, index) => (
-                <tr key={piloto._id || index}>
+                <tr key={piloto._id || index} className={index < 3 ? `classification-podium-${index + 1}` : ''}>
                   <td>{index + 1}</td>
                   <td>#{piloto.numero}</td>
                   <td>{getPilotFullName(piloto)}</td>
@@ -79,8 +108,15 @@ export const ClasificacionPage = () => {
         </div>
       )}
 
-      <h2>Mundial de Escuderías</h2>
-      {escuderiasActivas.length === 0 ? (
+      </> : <>
+      <div className="classification-section-heading">
+        <div>
+          <p className="piloto-eyebrow">Clasificación por constructor</p>
+          <h2>Mundial de Escuderías</h2>
+        </div>
+        <span className="classification-result-count">{escuderiasOrdenadas.length} escuderías</span>
+      </div>
+      {escuderiasOrdenadas.length === 0 ? (
         <p>No hay escuderías registradas en la base de datos.</p>
       ) : (
         <div className="piloto-table-container">
@@ -97,7 +133,7 @@ export const ClasificacionPage = () => {
             </thead>
             <tbody>
               {escuderiasOrdenadas.map((escuderia, index) => (
-                <tr key={escuderia._id || index}>
+                <tr key={escuderia._id || index} className={index < 3 ? `classification-podium-${index + 1}` : ''}>
                   <td>{index + 1}</td>
                   <td>{escuderia.nombre}</td>
                   <td>{escuderia.pais}</td>
@@ -110,6 +146,7 @@ export const ClasificacionPage = () => {
           </table>
         </div>
       )}
+      </>}
     </section>
   );
 };

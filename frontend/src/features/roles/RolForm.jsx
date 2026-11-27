@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { rolSchema } from './rolSchema';
 
 export const RolForm = ({ initialData, submitting, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ nombre: '', description: '' });
+  const [formData, setFormData] = useState({ nombre: '', description: '', isActive: true });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setFormData({
       nombre: initialData?.nombre || '',
-      description: initialData?.description || ''
+      description: initialData?.description || '',
+      isActive: initialData?.isActive !== false
     });
     setErrors({});
   }, [initialData]);
@@ -53,6 +54,14 @@ export const RolForm = ({ initialData, submitting, onSubmit, onCancel }) => {
       <input id="rol-description" name="description" value={formData.description}
         onChange={handleChange} disabled={submitting} {...fieldProps('description')} />
       {fieldError('description')}
+
+      <label htmlFor="rol-isActive">Estado de la ficha</label>
+      <select id="rol-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+      </select>
 
       <div className="modal-actions">
         <button type="submit" className="btn-primary" disabled={submitting}>

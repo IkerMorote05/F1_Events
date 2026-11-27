@@ -22,7 +22,8 @@ export const circuitoSchema = z.object({
   desgaste: z.string().trim().optional(),
   tiempoVueltaRapida: z.string().trim().optional(),
   pilotoVueltaRapida: z.string().trim().optional(),
-  anioVueltaRapida: optionalYear
+  anioVueltaRapida: optionalYear,
+  isActive: z.boolean()
 }).transform(({ tiempoVueltaRapida, pilotoVueltaRapida, anioVueltaRapida, ...circuito }) => {
   const vueltaRapidaFields = [tiempoVueltaRapida, pilotoVueltaRapida, anioVueltaRapida];
   const hasVueltaRapida = vueltaRapidaFields.some(Boolean);

@@ -10,6 +10,13 @@ import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { getEscuderiaById } from '../../services/escuderiaService';
 import { getShopCatalog } from '../../services/shopService';
 
+const getContrastColor = (hexColor) => {
+  const hex = hexColor.replace('#', '');
+  const channels = [0, 2, 4].map((index) => parseInt(hex.slice(index, index + 2), 16));
+  const luminance = (channels[0] * 299 + channels[1] * 587 + channels[2] * 114) / 1000;
+  return luminance > 150 ? '#111827' : '#ffffff';
+};
+
 export const EscuderiaDetailsPage = () => {
   const { slug } = useParams();
 
@@ -52,8 +59,11 @@ export const EscuderiaDetailsPage = () => {
 
   return (
     <section className="page-container home-page details-page">
-      <header className="page-header home-hero">
-        <div>
+      <header
+        className="page-header home-hero details-hero"
+        style={{ '--details-team-color': teamColor }}
+      >
+        <div className="details-hero-copy">
           <p className="piloto-eyebrow">
             Escudería
             {escuderia.siglas ? ` · ${escuderia.siglas}` : ''}
@@ -65,6 +75,9 @@ export const EscuderiaDetailsPage = () => {
             {escuderia.jefe ? ` · Jefe de equipo: ${escuderia.jefe}` : ''}
           </p>
         </div>
+        <span className="details-hero-number" style={{ '--details-number-color': getContrastColor(teamColor) }}>
+          {escuderia.siglas || 'F1'}
+        </span>
         <Link to="/shop?type=escuderia" className="btn-outline-red home-hero-cta">
           <ArrowLeft size={17} aria-hidden="true" />
           <span>Volver a escuderías</span>

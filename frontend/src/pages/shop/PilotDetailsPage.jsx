@@ -23,6 +23,13 @@ const calculateAge = (birthDate) => {
   return age >= 0 ? age : null;
 };
 
+const getContrastColor = (hexColor) => {
+  const hex = hexColor.replace('#', '');
+  const channels = [0, 2, 4].map((index) => parseInt(hex.slice(index, index + 2), 16));
+  const luminance = (channels[0] * 299 + channels[1] * 587 + channels[2] * 114) / 1000;
+  return luminance > 150 ? '#111827' : '#ffffff';
+};
+
 export const PilotDetailsPage = () => {
   const { slug } = useParams();
   const fetcher = useCallback(() => getPilotoById(slug), [slug]);
@@ -43,8 +50,11 @@ export const PilotDetailsPage = () => {
 
   return (
     <section className="page-container home-page details-page">
-      <header className="page-header home-hero">
-        <div>
+      <header
+        className="page-header home-hero details-hero"
+        style={{ '--details-team-color': teamColor }}
+      >
+        <div className="details-hero-copy">
           <p className="piloto-eyebrow">
             Piloto · #{piloto.numero}
             {piloto.categoria?.competicion ? ` · ${piloto.categoria.competicion}` : ''}
@@ -55,6 +65,9 @@ export const PilotDetailsPage = () => {
             {piloto.estado ? ` · ${piloto.estado}` : ''}
           </p>
         </div>
+        <span className="details-hero-number" style={{ '--details-number-color': getContrastColor(teamColor) }}>
+          #{piloto.numero}
+        </span>
         <Link to="/shop?type=pilot" className="btn-outline-red home-hero-cta">
           <ArrowLeft size={17} aria-hidden="true" />
           <span>Volver a pilotos</span>

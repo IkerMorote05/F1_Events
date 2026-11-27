@@ -12,7 +12,8 @@ const emptyForm = {
   escuderia: '',
   estado: 'compitiendo',
   categoria: '',
-  fecha_nacimiento: ''
+  fecha_nacimiento: '',
+  isActive: true
 };
 
 const toDateInput = (value) => (value ? String(value).slice(0, 10) : '');
@@ -36,7 +37,8 @@ export const PilotoForm = ({ initialData, escuderias, categorias, submitting, on
           escuderia: getReferenceId(initialData.escuderia),
           estado: initialData.estado || 'compitiendo',
           categoria: getReferenceId(initialData.categoria),
-          fecha_nacimiento: toDateInput(initialData.fecha_nacimiento)
+          fecha_nacimiento: toDateInput(initialData.fecha_nacimiento),
+          isActive: initialData.isActive !== false
         }
       : { ...emptyForm, escuderia: escuderias[0]?._id || '' });
     setImages(Array.isArray(initialData?.images)
@@ -212,6 +214,14 @@ export const PilotoForm = ({ initialData, escuderias, categorias, submitting, on
         ))}
       </select>
       {renderFieldError('categoria')}
+
+      <label htmlFor="piloto-isActive">Estado de la ficha</label>
+      <select id="piloto-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <section className="piloto-images-section" aria-labelledby="piloto-images-title">
         <div className="piloto-images-header">

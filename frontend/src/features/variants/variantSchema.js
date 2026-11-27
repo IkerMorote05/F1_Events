@@ -13,5 +13,6 @@ export const variantSchema = z.object({
     .refine((value) => Math.round(Number(value) * 100) === Number(value) * 100, 'Usa como máximo dos decimales')
     .transform(Number),
   categoriaEntrada: z.string().min(1, 'Selecciona una categoría de entrada'),
-  categoriaGrada: z.string().min(1, 'Selecciona una categoría de grada')
+  categoriaGrada: z.string().min(1, 'Selecciona una categoría de grada'),
+  isActive: z.boolean()
 });

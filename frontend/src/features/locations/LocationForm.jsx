@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { locationImageSchema, locationSchema } from './locationSchema';
 
 export const LocationForm = ({ initialData, submitting, onSubmit, onCancel }) => {
-  const [formData, setFormData] = useState({ pais: '', ciudad: '', capital: '' });
+  const [formData, setFormData] = useState({ pais: '', ciudad: '', capital: '', isActive: true });
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({});
 
@@ -10,7 +10,8 @@ export const LocationForm = ({ initialData, submitting, onSubmit, onCancel }) =>
     setFormData({
       pais: initialData?.pais || '',
       ciudad: initialData?.ciudad || '',
-      capital: initialData?.capital || ''
+      capital: initialData?.capital || '',
+      isActive: initialData?.isActive !== false
     });
     setImages(Array.isArray(initialData?.images)
       ? initialData.images.map(({ _id, image_url, alt_text }) => ({
@@ -110,6 +111,14 @@ export const LocationForm = ({ initialData, submitting, onSubmit, onCancel }) =>
       <input id="location-capital" name="capital" value={formData.capital} onChange={handleChange}
         disabled={submitting} {...fieldProps('capital')} />
       {fieldError('capital')}
+
+      <label htmlFor="location-isActive">Estado de la ficha</label>
+      <select id="location-isActive" name="isActive" value={String(formData.isActive)}
+        onChange={(event) => setFormData((current) => ({ ...current, isActive: event.target.value === 'true' }))}
+        disabled={submitting}>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
 
       <section className="piloto-images-section" aria-labelledby="location-images-title">
         <div className="piloto-images-header">

@@ -10,7 +10,8 @@ export const carreraSchema = z.object({
     .transform(Number)
     .pipe(z.number().int().min(0, 'La capacidad no puede ser negativa')),
   circuito: z.string().min(1, 'Selecciona un circuito'),
-  estado: z.enum(['En vigor', 'Cancelada', 'Aplazada', 'Finalizada'])
+  estado: z.enum(['En vigor', 'Cancelada', 'Aplazada', 'Finalizada']),
+  isActive: z.boolean()
 });
 
 export const carreraImageSchema = z.object({
