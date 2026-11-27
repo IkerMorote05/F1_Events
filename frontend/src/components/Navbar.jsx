@@ -13,6 +13,7 @@ import {
   MapPin,
   Package,
   Ticket,
+  ShoppingBag,
   LogIn,
   LogOut,
   UserRound,
@@ -89,6 +90,10 @@ export const Navbar = () => {
           <NavLink to="/" end className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
             <Home size={17} aria-hidden="true" />
             <span>Inicio</span>
+          </NavLink>
+          <NavLink to="/shop" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
+            <ShoppingBag size={17} aria-hidden="true" />
+            <span>Tienda</span>
           </NavLink>
           <NavLink to="/clasificacion" className={({ isActive }) => `f1-nav-link${isActive ? ' active' : ''}`}>
             <Trophy size={17} aria-hidden="true" />

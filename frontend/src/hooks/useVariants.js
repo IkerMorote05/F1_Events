@@ -1,10 +1,13 @@
+import { useCallback } from 'react';
 import {
   createVariant,
   deleteVariant,
   getVariantById,
+  getVariants,
   getVariantsAdmin,
   updateVariant
 } from '../services/variantService';
+import { useAsyncResource } from './useAsyncResource';
 import { useCollection } from './useCollection';
 
 export const useVariants = () => {
@@ -22,5 +25,22 @@ export const useVariants = () => {
     ...collection,
     load: collection.reload,
     getById: getVariantById
+  };
+};
+
+export const usePublicVariants = ({ enabled = true } = {}) => {
+  const fetcher = useCallback(() => getVariants(), []);
+  const { data, loading, error, reload } = useAsyncResource({
+    fetcher,
+    initialData: [],
+    enabled,
+    errorMessage: 'No se pudieron cargar las variantes.'
+  });
+
+  return {
+    variants: Array.isArray(data) ? data : [],
+    loading,
+    error,
+    reload
   };
 };

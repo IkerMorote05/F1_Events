@@ -7,6 +7,7 @@
  * left-border accent and badge row.
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Ticket } from 'lucide-react';
 import { NationalityBadge } from '../../components/NationalityBadge';
 import { TEAM_COLORS } from '../../components/teamColors';
@@ -29,7 +30,7 @@ export const HomeCardMedia = ({ entity }) => {
   );
 };
 
-/* ── Ticket card body ─────────────────────────────────────── */
+/* ── Ticket card ──────────────────────────────────────────── */
 export const TicketCardBody = ({ ticket, onSelectTicket }) => {
   const totalPrice = getTicketTotalPrice(ticket);
   const entryLabel = ticket.category?.categoriaEntrada?.categoriaEntrada;
@@ -71,7 +72,7 @@ export const TicketCardBody = ({ ticket, onSelectTicket }) => {
   );
 };
 
-/* ── Race card body ───────────────────────────────────────── */
+/* ── Race card ────────────────────────────────────────────── */
 export const RaceCardBody = ({ race }) => (
   <>
     <HomeCardMedia entity={race} />
@@ -86,10 +87,18 @@ export const RaceCardBody = ({ race }) => (
     ) : null}
     <p><strong>Fecha:</strong> {formatDate(race.fecha)}</p>
     <p><strong>Capacidad:</strong> {Number(race.capacidad || 0).toLocaleString('es-ES')} plazas</p>
+    <div className="home-card-footer">
+      <Link
+        to={`/shop/race/${encodeURIComponent(race.slug || race._id)}`}
+        className="btn-secondary home-card-cta"
+      >
+        Ver detalle
+      </Link>
+    </div>
   </>
 );
 
-/* ── Circuit card body ────────────────────────────────────── */
+/* ── Circuit card ─────────────────────────────────────────── */
 export const CircuitCardBody = ({ circuit }) => (
   <>
     <HomeCardMedia entity={circuit} />
@@ -116,14 +125,18 @@ export const CircuitCardBody = ({ circuit }) => (
         {circuit.vueltaRapida.piloto ? ` (${circuit.vueltaRapida.piloto})` : ''}
       </p>
     ) : null}
+    <div className="home-card-footer">
+      <Link
+        to={`/shop/circuit/${encodeURIComponent(circuit.slug || circuit._id)}`}
+        className="btn-secondary home-card-cta"
+      >
+        Ver detalle
+      </Link>
+    </div>
   </>
 );
 
-/* ── Pilot card (full article) ────────────────────────────── */
-/**
- * Gradient header with team colour + race number, optional photo, stats.
- * Same look in both carousel and filtered grid.
- */
+/* ── Pilot card ───────────────────────────────────────────── */
 export const PilotCard = ({ piloto, className = '' }) => {
   const teamColor = TEAM_COLORS[piloto.escuderia?.siglas]?.primary || '#e10600';
   const image = getEntityImage(piloto);
@@ -156,15 +169,19 @@ export const PilotCard = ({ piloto, className = '' }) => {
         {' · '}
         <span>{piloto.podios || 0} podios</span>
       </p>
+      <div className="home-card-footer">
+        <Link
+          to={`/shop/pilot/${encodeURIComponent(piloto.slug || piloto._id)}`}
+          className="btn-secondary home-card-cta"
+        >
+          Ver detalle
+        </Link>
+      </div>
     </article>
   );
 };
 
-/* ── Team card (full article) ─────────────────────────────── */
-/**
- * Left-border accent with team colour, badges, stats.
- * Same look in both carousel and filtered grid.
- */
+/* ── Team (escudería) card ────────────────────────────────── */
 export const TeamCard = ({ escuderia, puntos, className = '' }) => {
   const primaryColor = TEAM_COLORS[escuderia.siglas]?.primary || '#e10600';
 
@@ -188,15 +205,19 @@ export const TeamCard = ({ escuderia, puntos, className = '' }) => {
           {puntos ?? escuderia.puntos ?? 0} PTS
         </span>
       </p>
+      <div className="home-card-footer">
+        <Link
+          to={`/shop/escuderia/${encodeURIComponent(escuderia.slug || escuderia._id)}`}
+          className="btn-secondary home-card-cta"
+        >
+          Ver detalle
+        </Link>
+      </div>
     </article>
   );
 };
 
-/* ── CatalogCard dispatcher ───────────────────────────────── */
-/**
- * Renders the right card for a given catalog item type.
- * Returns a fully-styled <article> (or <PilotCard>/<TeamCard>).
- */
+/* ── Catalog router helper ────────────────────────────────── */
 export const CatalogCard = ({ item, onSelectTicket }) => {
   switch (item.type) {
     case 'ticket':

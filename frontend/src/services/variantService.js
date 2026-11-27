@@ -1,5 +1,8 @@
 import { apiService, getResponseData } from './api';
 
+export const getVariants = async (params = {}) => getResponseData(
+  await apiService.get('/variants', { params })
+);
 export const getVariantsAdmin = async () => (
   await apiService.get('/variants', { params: { includeDeleted: true } })
 ).data;

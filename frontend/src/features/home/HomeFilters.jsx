@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Euro, Layers, MapPin, Route, Search, SlidersHorizontal, Ticket, X } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowUpDown, Euro, Layers, MapPin, Route, SlidersHorizontal, Ticket, X } from 'lucide-react';
+import { SearchBar } from '../../components/SearchBar';
 
 const TYPE_OPTIONS = [
   { value: '', label: 'Todo' },
@@ -8,6 +9,18 @@ const TYPE_OPTIONS = [
   { value: 'circuit', label: 'Circuitos' },
   { value: 'pilot', label: 'Pilotos' },
   { value: 'escuderia', label: 'Escuderías' }
+];
+
+const PILOT_SORT_OPTIONS = [
+  { value: '', label: 'Por defecto' },
+  { value: 'numero_asc', label: 'Número: menor a mayor' },
+  { value: 'numero_desc', label: 'Número: mayor a menor' },
+  { value: 'edad_asc', label: 'Edad: menor a mayor' },
+  { value: 'edad_desc', label: 'Edad: mayor a menor' },
+  { value: 'nombre_asc', label: 'Nombre: A - Z' },
+  { value: 'nombre_desc', label: 'Nombre: Z - A' },
+  { value: 'escuderia_asc', label: 'Escudería: A - Z' },
+  { value: 'escuderia_desc', label: 'Escudería: Z - A' }
 ];
 
 const LOCATION_TYPES = new Set(['', 'ticket', 'race', 'circuit']);
@@ -53,15 +66,10 @@ export const HomeFilters = ({
   onToggleCategory,
   onResetFilters
 }) => {
-  const [searchInput, setSearchInput] = useState(filters.search || '');
   const [priceInputs, setPriceInputs] = useState({
     minPrice: filters.minPrice || '',
     maxPrice: filters.maxPrice || ''
   });
-
-  useEffect(() => {
-    setSearchInput(filters.search || '');
-  }, [filters.search]);
 
   useEffect(() => {
     setPriceInputs({
@@ -69,15 +77,6 @@ export const HomeFilters = ({
       maxPrice: filters.maxPrice || ''
     });
   }, [filters.minPrice, filters.maxPrice]);
-
-  useEffect(() => {
-    const trimmed = searchInput.trim();
-    if (trimmed === filters.search.trim()) return undefined;
-    const timer = setTimeout(() => {
-      onUpdateFilters({ search: searchInput });
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [filters.search, onUpdateFilters, searchInput]);
 
   useEffect(() => {
     if (
@@ -95,6 +94,10 @@ export const HomeFilters = ({
     return () => clearTimeout(timer);
   }, [filters.maxPrice, filters.minPrice, onUpdateFilters, priceInputs.maxPrice, priceInputs.minPrice]);
 
+  const handleSearch = useCallback((search) => {
+    onUpdateFilters({ search });
+  }, [onUpdateFilters]);
+
   const groupedCategories = useMemo(() => {
     const circuit = categories?.circuit || [];
     return {
@@ -109,15 +112,7 @@ export const HomeFilters = ({
   const showLocation = LOCATION_TYPES.has(filters.type);
   const showCircuitFilters = CIRCUIT_TYPES.has(filters.type);
   const showTicketFilters = TICKET_TYPES.has(filters.type);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    onUpdateFilters({
-      search: searchInput,
-      minPrice: priceInputs.minPrice,
-      maxPrice: priceInputs.maxPrice
-    });
-  };
+  const showPilotSort = filters.type === 'pilot';
 
   const handleTypeSelect = (nextType) => {
     const allowedCategories = new Set(groupedCategories.global.map(getFilterKey));
@@ -135,7 +130,8 @@ export const HomeFilters = ({
       categories: filters.categories.filter((value) => allowedCategories.has(value)),
       localizacion: LOCATION_TYPES.has(nextType) ? filters.localizacion : '',
       minPrice: TICKET_TYPES.has(nextType) ? filters.minPrice : '',
-      maxPrice: TICKET_TYPES.has(nextType) ? filters.maxPrice : ''
+      maxPrice: TICKET_TYPES.has(nextType) ? filters.maxPrice : '',
+      sort: nextType === 'pilot' ? filters.sort : ''
     });
   };
 
@@ -158,19 +154,7 @@ export const HomeFilters = ({
         ) : null}
       </div>
 
-      <form className="home-search-form" onSubmit={handleSubmit} role="search">
-        <div className="home-search-input-wrap">
-          <Search size={18} aria-hidden="true" />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Buscar en el catálogo..."
-            aria-label="Buscar en el catálogo"
-          />
-        </div>
-        <button type="submit" className="btn-primary home-search-submit">Buscar</button>
-      </form>
+      <SearchBar value={filters.search} onSearch={handleSearch} />
 
       <div className="home-filter-row">
         <span className="home-filter-label">Tipo</span>
@@ -192,6 +176,27 @@ export const HomeFilters = ({
           })}
         </div>
       </div>
+
+      {showPilotSort ? (
+        <div className="home-filter-group">
+          <label className="home-filter-label" htmlFor="pilot-sort-select">
+            <ArrowUpDown size={15} aria-hidden="true" />
+            <span>Ordenar pilotos</span>
+          </label>
+          <select
+            id="pilot-sort-select"
+            className="home-sort-select"
+            value={filters.sort || ''}
+            onChange={(event) => onUpdateFilters({ sort: event.target.value, offset: filters.offset })}
+          >
+            {PILOT_SORT_OPTIONS.map((option) => (
+              <option key={option.value || 'default'} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       {groupedCategories.global.length > 0 ? (
         <div className="home-filter-group">

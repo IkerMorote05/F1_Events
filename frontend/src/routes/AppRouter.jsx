@@ -6,6 +6,12 @@ import { GuardAdmin } from './guards/guardAdmin';
 import { GuardAuth } from './guards/guardAuth';
 
 const ClasificacionPage = lazy(() => import('../pages/clasificacion/ClasificacionPage'));
+const ShopListPage = lazy(() => import('../pages/shop/ShopListPage'));
+const DetailsPage = lazy(() => import('../pages/shop/DetailsPage'));
+const PilotDetailsPage = lazy(() => import('../pages/shop/PilotDetailsPage'));
+const EscuderiaDetailsPage = lazy(() => import('../pages/shop/EscuderiaDetailsPage'));
+const RaceDetailsPage = lazy(() => import('../pages/shop/RaceDetailsPage'));
+const CircuitDetailsPage = lazy(() => import('../pages/shop/CircuitDetailsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage'));
 const PilotosListPage = lazy(() => import('../pages/pilotos/PilotosListPage'));
@@ -59,6 +65,12 @@ export const AppRouter = () => {
     <Suspense fallback={<PilotoSkeleton />}>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/shop" element={<ShopListPage />} />
+        <Route path="/shop/pilot/:slug" element={<PilotDetailsPage />} />
+        <Route path="/shop/escuderia/:slug" element={<EscuderiaDetailsPage />} />
+        <Route path="/shop/race/:slug" element={<RaceDetailsPage />} />
+        <Route path="/shop/circuit/:slug" element={<CircuitDetailsPage />} />
+        <Route path="/shop/:slug" element={<DetailsPage />} />
         <Route path="/clasificacion" element={<ClasificacionPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<GuardAuth />}>

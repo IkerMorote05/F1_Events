@@ -9,6 +9,7 @@ export const HomeCatalogResults = ({
   pagination,
   loading,
   error,
+  hasActiveFilters = false,
   hasInvalidPriceRange,
   onRetry,
   onPageChange,
@@ -28,7 +29,7 @@ export const HomeCatalogResults = ({
   if (error) return <PilotoError resourceName="catálogo" message={error} onRetry={onRetry} />;
 
   const total = pagination?.total || 0;
-  const limit = pagination?.limit || 5;
+  const limit = pagination?.limit || 12;
   const offset = pagination?.offset || 0;
   const currentPage = Math.floor(offset / limit) + 1;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -36,29 +37,33 @@ export const HomeCatalogResults = ({
   const to = Math.min(offset + items.length, total);
 
   return (
-    <section className="home-section" aria-label="Resultados filtrados del catálogo">
+    <section className="home-section" aria-label="Resultados del catálogo">
       <div className="home-section-header">
         <div>
-          <h2>Resultados del catálogo</h2>
+          <h2>{hasActiveFilters ? 'Resultados del catálogo' : 'Catálogo completo'}</h2>
           <p>
             {total > 0
               ? `Mostrando ${from}–${to} de ${total} ${total === 1 ? 'resultado' : 'resultados'}`
               : '0 resultados encontrados'}
           </p>
         </div>
-        <div className="home-section-header-right">
-          <button type="button" className="btn-secondary" onClick={onResetFilters}>
-            Volver a portada
-          </button>
-        </div>
+        {hasActiveFilters ? (
+          <div className="home-section-header-right">
+            <button type="button" className="btn-secondary" onClick={onResetFilters}>
+              Limpiar filtros
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {items.length === 0 ? (
         <div className="home-empty-state">
           <p>No se encontraron elementos con los filtros seleccionados.</p>
-          <button type="button" className="btn-primary" onClick={onResetFilters}>
-            Mostrar todo el Home
-          </button>
+          {hasActiveFilters ? (
+            <button type="button" className="btn-primary" onClick={onResetFilters}>
+              Mostrar todo el catálogo
+            </button>
+          ) : null}
         </div>
       ) : (
         <>

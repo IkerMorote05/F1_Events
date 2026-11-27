@@ -9,6 +9,6 @@ const router = Router();
 
 router.post('/register', authenticate, authorize('Admin'), validate(authRegister), authController.registrar);
 router.post('/login', validate(authLogin), authController.iniciarSesion);
-router.post('/logout', authenticate, authorize('Admin'), authController.cerrarSesion);
+router.post('/logout', authenticate, authController.cerrarSesion);
 
 module.exports = router;
